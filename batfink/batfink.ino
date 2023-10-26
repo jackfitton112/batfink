@@ -3,22 +3,12 @@
 #include <Arduino.h>
 #include <ARB.h>
 #include <ArduinoBLE.h>
-//#include <Arduino_LSM9DS1.h>
 #include "MotorControl.h"
 
 // BLE Service and Characteristic
 BLEService robotService("19B10000-E8F2-537E-4F6C-D104768A1214");
 BLECharCharacteristic commandCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
 
-// Left Motor PID Characteristics
-BLEFloatCharacteristic kpLeftCharacteristic("19B10002-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
-BLEFloatCharacteristic kiLeftCharacteristic("19B10003-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
-BLEFloatCharacteristic kdLeftCharacteristic("19B10004-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
-
-// Right Motor PID Characteristics
-BLEFloatCharacteristic kpRightCharacteristic("19B10005-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
-BLEFloatCharacteristic kiRightCharacteristic("19B10006-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
-BLEFloatCharacteristic kdRightCharacteristic("19B10007-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
 
 
 // The received command
@@ -117,15 +107,7 @@ void setup() {
   BLE.setLocalName("RobotController");
   BLE.setAdvertisedService(robotService);
   robotService.addCharacteristic(commandCharacteristic);
-  // Left Motor
-  robotService.addCharacteristic(kpLeftCharacteristic);
-  robotService.addCharacteristic(kiLeftCharacteristic);
-  robotService.addCharacteristic(kdLeftCharacteristic);
 
-  // Right Motor
-  robotService.addCharacteristic(kpRightCharacteristic);
-  robotService.addCharacteristic(kiRightCharacteristic);
-  robotService.addCharacteristic(kdRightCharacteristic);
 
   BLE.addService(robotService);
   String bleAddress = BLE.address();
@@ -161,43 +143,7 @@ void loop() {
           resetSync();
       }
     }
-    /*
-    // Update PID values if they're written to
-    // Left Motor PID updates
-    if (kpLeftCharacteristic.written()) {
-        float newKp = kpLeftCharacteristic.value();
-        leftMotorPID.updatePIDValues(newKp, leftMotorPID.getKi(), leftMotorPID.getKd());
-    }
-
-    if (kiLeftCharacteristic.written()) {
-        float newKi = kiLeftCharacteristic.value();
-        leftMotorPID.updatePIDValues(leftMotorPID.getKp(), newKi, leftMotorPID.getKd());
-    }
-
-    if (kdLeftCharacteristic.written()) {
-        float newKd = kdLeftCharacteristic.value();
-        leftMotorPID.updatePIDValues(leftMotorPID.getKp(), leftMotorPID.getKi(), newKd);
-    }
-
-    // Right Motor PID updates
-    if (kpRightCharacteristic.written()) {
-        float newKp = kpRightCharacteristic.value();
-        rightMotorPID.updatePIDValues(newKp, rightMotorPID.getKi(), rightMotorPID.getKd());
-    }
-
-    if (kiRightCharacteristic.written()) {
-        float newKi = kiRightCharacteristic.value();
-        rightMotorPID.updatePIDValues(rightMotorPID.getKp(), newKi, rightMotorPID.getKd());
-    }
-
-    if (kdRightCharacteristic.written()) {
-        float newKd = kdRightCharacteristic.value();
-        rightMotorPID.updatePIDValues(rightMotorPID.getKp(), rightMotorPID.getKi(), newKd);
-    }
-
-    */
-
-
+ 
   }
 
   //if robot is going backwards or forwards, use PID to control the motors
@@ -229,8 +175,8 @@ void driveRobot(int command) {
 
 void controlMotorsToTarget() {
 
-    int TARGET = 600;
-    const int encoderResetThreshold = 595; // Some value close to 600
+    int TARGET = 1800;
+    const int encoderResetThreshold = 1795; // Some value close to 600
 
     int leftTarget = TARGET;
     int rightTarget = TARGET;
@@ -238,16 +184,7 @@ void controlMotorsToTarget() {
     int leftEncoderValue = leftMotor->getSteps();
     int rightEncoderValue = rightMotor->getSteps();
 
-    /*     // If both encoders have nearly reached the target, reset them
-    if (leftEncoderValue >= encoderResetThreshold && rightEncoderValue >= encoderResetThreshold) {
-        resetRightEncoder();
-        resetLeftEncoder();
-        leftMotorPID.resetIntegral();
-        rightMotorPID.resetIntegral();
-        leftEncoderValue = 0;
-        rightEncoderValue = 0;
-    }
-    */
+
 
     // Calculate error for each motor
     float leftError = leftTarget - leftEncoderValue;

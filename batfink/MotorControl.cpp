@@ -53,7 +53,7 @@ void Motor::resetEncoder() {
     _steps = 0;
 }
 
-// ISR handlers need to be global, we'll set function pointers to these
+// ISR handlers need to be global
 Motor *leftMotor;
 Motor *rightMotor;
 
