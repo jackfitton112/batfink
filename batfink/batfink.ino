@@ -5,9 +5,15 @@
 #include <ArduinoBLE.h>
 #include "MotorControl.h"
 
+#define FRONT_SENSOR USONIC1
+#define RIGHT_SENSOR USONIC2
+#define LEFT_SENSOR USONIC3
+
 // BLE Service and Characteristic
 BLEService robotService("19B10000-E8F2-537E-4F6C-D104768A1214");
 BLECharCharacteristic commandCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
+
+
 
 
 
@@ -19,6 +25,27 @@ int direction = 0;  // Add this line
 int direction_of_travel() {
   return direction;
 }
+
+//git distance from one of the 3 ultrasonic sensors
+int get_distance(int sensor) {
+
+	pinMode(sensor, OUTPUT);
+	digitalWrite(sensor, LOW);
+	delayMicroseconds(2);
+	digitalWrite(sensor, HIGH);
+	delayMicroseconds(15);
+	digitalWrite(sensor, LOW);
+
+	// The same pin is used to read back the returning signal, so must be set back to input
+	pinMode(sensor, INPUT);
+	int duration = pulseIn(sensor, HIGH);
+
+  int distance =  uSecToCM(duration);
+
+
+}
+
+
 
 
 
@@ -87,15 +114,16 @@ PIDController leftMotorPID(1.5,0,0.1);
 PIDController rightMotorPID(2.2,0,0.05);
 
 
-
-
-
 void setup() {
  
   ARBSetup(); // Setup ARB functionallity
   Motor_setup(); // Setup motor functionallity
 
   Serial.begin(9600);
+
+  //wait for serial
+  while (!Serial);
+  
 
    // Initialize BLE 
    if (!BLE.begin()) {   
@@ -104,8 +132,8 @@ void setup() {
   }
 
   // Add service and characteristic
-  BLE.setLocalName("RobotController");
-  BLE.setAdvertisedService(robotService);
+  //BLE.setLocalName("Batfink");
+  //BLE.setAdvertisedService(robotService);
   robotService.addCharacteristic(commandCharacteristic);
 
 
@@ -120,12 +148,14 @@ void setup() {
   BLE.advertise();
 
   Serial.println("Robot is waiting for commands...");
+
+  
 }
 
 void loop() {
   
+  
   BLEDevice central = BLE.central();
-
 
   // If a device just connected
   if (central && !central.connected()) {
@@ -150,6 +180,30 @@ void loop() {
   if (direction_of_travel() == 1 || direction_of_travel() == 2) {
       controlMotorsToTarget();
   }
+
+
+
+
+  //get distance from front sensor
+  int front_distance = get_distance(FRONT_SENSOR);
+
+  //if front distance is less than 10cm and direction is forward, stop robot and turn left
+  if (front_distance < 10 && direction_of_travel() == 1) {
+      Serial.println("Obstacle detected, turning left");
+      stopRobot();
+      delay(1000);
+      left();
+      delay(1000);
+      stopRobot();
+      delay(1000);
+  }
+
+
+
+
+
+
+
 }
 
 
