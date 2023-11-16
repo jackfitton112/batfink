@@ -5,13 +5,89 @@
 #include <ArduinoBLE.h>
 #include "MotorControl.h"
 
-#define FRONT_SENSOR USONIC1
-#define RIGHT_SENSOR USONIC2
-#define LEFT_SENSOR USONIC3
+//Both echo and trig are wired to the same pin per sensor
+#define FRONT_SENSOR D7
+#define RIGHT_SENSOR D6
+#define LEFT_SENSOR D5
+
+//ultrasonic vaialbles
+int front_distance = 0;
+int right_distance = 0;
+int left_distance = 0;
+
+int front_trig_time = 0;
+int right_trig_time = 0;
+int left_trig_time = 0;
+
+int front_echo_time = 0;
+int right_echo_time = 0;
+int left_echo_time = 0;
+
+int front_trig_state = 0;
+int right_trig_state = 0;
+int left_trig_state = 0;
+
+int front_distance_cm = 0;
+int right_distance_cm = 0;
+int left_distance_cm = 0;
+
+int interupt_counter = 0;
+
+
 
 // BLE Service and Characteristic
 BLEService robotService("19B10000-E8F2-537E-4F6C-D104768A1214");
 BLECharCharacteristic commandCharacteristic("19B10001-E8F2-537E-4F6C-D104768A1214", BLERead | BLEWrite);
+
+/*
+	pinMode(USONIC1, OUTPUT);
+	digitalWrite(USONIC1, LOW);
+	delayMicroseconds(2);
+	digitalWrite(USONIC1, HIGH);
+	delayMicroseconds(15);
+	digitalWrite(USONIC1, LOW);
+
+	// The same pin is used to read back the returning signal, so must be set back to input
+	pinMode(USONIC1, INPUT);
+	duration[0] = pulseIn(USONIC1, HIGH);
+*/
+
+//ultrasonic functions
+int getDistance(int sensor){
+  //set pinmode to output
+  pinMode(sensor, OUTPUT);
+
+  //set pin to low
+  digitalWrite(sensor, LOW);
+
+  //wait 2 microseconds
+  delayMicroseconds(2);
+
+  //set pin to high
+  digitalWrite(sensor, HIGH);
+
+  //wait 15 microseconds
+  delayMicroseconds(15);
+
+  //set pin to low
+  digitalWrite(sensor, LOW);
+
+  //set pinmode to input
+  pinMode(sensor, INPUT);
+
+  //get duration of pulse
+  int duration = pulseIn(sensor, HIGH);
+
+  //calculate distance in cm
+  int distance = duration * 0.034 / 2;
+
+  return distance;
+
+
+}
+
+
+
 
 
 
@@ -26,24 +102,6 @@ int direction_of_travel() {
   return direction;
 }
 
-//git distance from one of the 3 ultrasonic sensors
-int get_distance(int sensor) {
-
-	pinMode(sensor, OUTPUT);
-	digitalWrite(sensor, LOW);
-	delayMicroseconds(2);
-	digitalWrite(sensor, HIGH);
-	delayMicroseconds(15);
-	digitalWrite(sensor, LOW);
-
-	// The same pin is used to read back the returning signal, so must be set back to input
-	pinMode(sensor, INPUT);
-	int duration = pulseIn(sensor, HIGH);
-
-  int distance =  uSecToCM(duration);
-
-
-}
 
 
 
@@ -115,9 +173,9 @@ PIDController rightMotorPID(2.2,0,0.05);
 
 
 void setup() {
- 
-  ARBSetup(); // Setup ARB functionallity
-  Motor_setup(); // Setup motor functionallity
+  /*
+  //ARBSetup(); // Setup ARB functionallity
+
 
   Serial.begin(9600);
 
@@ -149,13 +207,24 @@ void setup() {
 
   Serial.println("Robot is waiting for commands...");
 
+  */
+
+  //setup ultrasonic
+  //ultrasonic_init();
+
+  //setup serial 
+  Serial.begin(9600);
+  Motor_setup(); // Setup motor functionallity
+
   
 }
 
 void loop() {
   
   
-  BLEDevice central = BLE.central();
+  //BLEDevice central = BLE.central();
+
+  /*
 
   // If a device just connected
   if (central && !central.connected()) {
@@ -181,22 +250,36 @@ void loop() {
       controlMotorsToTarget();
   }
 
+  */
 
 
+  //ultrasonic
+  int front_distance = getDistance(FRONT_SENSOR);
+  //int right_distance = getDistance(RIGHT_SENSOR);
+  //int left_distance = getDistance(LEFT_SENSOR);
 
-  //get distance from front sensor
-  int front_distance = get_distance(FRONT_SENSOR);
-
-  //if front distance is less than 10cm and direction is forward, stop robot and turn left
+  //if front distance is less than 10cm, stop robot
   if (front_distance < 10 && direction_of_travel() == 1) {
-      Serial.println("Obstacle detected, turning left");
-      stopRobot();
-      delay(1000);
-      left();
-      delay(1000);
-      stopRobot();
-      delay(1000);
+    stopRobot();
+    direction = 0;
   }
+
+  //if distance is more than 10cm and the robot is stopped, drive
+  if (front_distance > 10 && direction_of_travel() == 0) {
+    MOTOR_LEFT = 100;
+    MOTOR_RIGHT = 100;
+    driveRobot(1);
+    direction = 1;
+  }
+
+  
+
+
+
+
+
+
+
 
 
 
