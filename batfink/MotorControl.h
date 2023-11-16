@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include <ARB.h>
 
-// Your enumerations
+// directios
 enum Direction {CW, CCW}; 
 
 class Motor {

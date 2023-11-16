@@ -3,8 +3,8 @@
 #include <Arduino.h>
 #include <ARB.h>
 
-int MOTOR_LEFT = 0;
-int MOTOR_RIGHT = 0;
+int MOTOR_LEFT = 200;
+int MOTOR_RIGHT = 200;
 
 // No redefinition of the Motor class here!
 
@@ -79,7 +79,7 @@ void Motor_setup() {
 
 
 void forward() {
-  Serial.println("Moving Forward");
+  //Serial.println("Moving Forward");
   rightMotor->setDirection(CCW);
   leftMotor->setDirection(CW);
   rightMotor->resetEncoder();
@@ -89,7 +89,7 @@ void forward() {
 }
 
 void left() {
-  Serial.println("Turning Left");
+  //Serial.println("Turning Left");
   rightMotor->setDirection(CCW);
   leftMotor->setDirection(CCW);
   rightMotor->resetEncoder();
@@ -99,7 +99,7 @@ void left() {
 }
 
 void right() {
-  Serial.println("Turning Right");
+  //Serial.println("Turning Right");
   rightMotor->setDirection(CW);
   leftMotor->setDirection(CW);
   rightMotor->resetEncoder();
@@ -109,7 +109,7 @@ void right() {
 }
 
 void backward() {
-  Serial.println("Moving Backward");
+  //Serial.println("Moving Backward");
   rightMotor->setDirection(CW);
   leftMotor->setDirection(CCW);
   rightMotor->resetEncoder();
@@ -119,7 +119,7 @@ void backward() {
 }
 
 void stopRobot() {
-  Serial.println("Stopping");
+  //Serial.println("Stopping");
   rightMotor->setSpeed(0);
   leftMotor->setSpeed(0);
 }
