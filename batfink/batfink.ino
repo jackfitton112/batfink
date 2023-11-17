@@ -125,6 +125,7 @@ void ble_worker_thread(){
 
 
         //check if start char is 50 (2 in ascii), if so, enter rave mode
+        /*
         if (startChar.value() == 50){
             //take mutex and set override to 1
             overrideMutex.lock();
@@ -140,6 +141,7 @@ void ble_worker_thread(){
             prevStartValue = 50;
 
         }
+        */
         // write the value of the sensor data to the characteristic
 
         //take mutexand check distance
