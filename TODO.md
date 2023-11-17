@@ -10,9 +10,9 @@
 
 - [ ] Implement BLE override
 
-- [ ] Implement point cloud mapping via BLE and tkinter
+- [X] Implement point cloud mapping via BLE and tkinter
 
-- [ ] add "rave mode" to the robot
+- [X] add "rave mode" to the robot
 
 
 ## Needed for PID
