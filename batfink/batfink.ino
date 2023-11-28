@@ -10,6 +10,7 @@
 <<<<<<< Updated upstream
 #include "drive.h"
 =======
+#include "ble.h"
 
 
 >>>>>>> Stashed changes
@@ -19,16 +20,7 @@ void setup(){
     //setup motors
     Motor_setup();
 
-<<<<<<< Updated upstream
-    //setup bluetooth
-    setup_ble();
 
-    //start the poll thread
-    ble.start(ble_thread);
-    ble_worker.start(ble_worker_thread);
-
-=======
->>>>>>> Stashed changes
     Serial.begin(9600);
 
     //start usonic thread
@@ -39,11 +31,52 @@ void setup(){
     //start motor thread
     motorThread.start(motorDrive);
 
-    //setup ble
-    ble_setup();
-
 
 }
+
+
+void turn_left(){
+
+
+        //turn left
+        motorMutex.lock();
+        drive_direction = 3;
+        motorMutex.unlock();
+
+        //sleep for 1s, this does approx 90 degrees
+        rtos::ThisThread::sleep_for(2000);
+
+        //stop
+        motorMutex.lock();
+        drive_direction = 0;
+        motorMutex.unlock();
+}
+
+void turn_right(){
+
+        //turn right
+        motorMutex.lock();
+        drive_direction = 4;
+        motorMutex.unlock();
+
+        //sleep for 1s, this does approx 90 degrees
+        rtos::ThisThread::sleep_for(2000);
+
+        //stop
+        motorMutex.lock();
+        drive_direction = 0;
+        motorMutex.unlock();
+
+}
+
+void go_forward(){
+        //go forward
+        motorMutex.lock();
+        drive_direction = 1;
+        motorMutex.unlock();
+
+}
+
 
 
 void loop() {

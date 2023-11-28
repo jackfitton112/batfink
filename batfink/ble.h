@@ -84,9 +84,18 @@ void ble_setup(){
 =======
     //add characteristics
     batfinkService.addCharacteristic(controlChar);
-    batfinkService.addCharacteristic(sensorChar);
+    batfinkService.addCharacteristic(frontusonicChar);
+    batfinkService.addCharacteristic(leftusonicChar);
+    batfinkService.addCharacteristic(rightusonicChar);
 
->>>>>>> Stashed changes
+    //add service
+    BLE.addService(batfinkService);
+
+    //set characteristics
+    controlChar.writeValue(200);
+    frontusonicChar.writeValue(0);
+    leftusonicChar.writeValue(0);
+    rightusonicChar.writeValue(0);
 
     //start advertising
     BLE.advertise();
@@ -101,17 +110,8 @@ void ble_setup(){
     Serial.print("Connected to: ");
     Serial.println(BLE.address());
 
-<<<<<<< Updated upstream
-
-}
-
-void ble_thread(){
-    //keep ble running
-    while(1){
-=======
-    //start polling thread and events thread
-    blePollThread.start(ble_loop);
-    bleEventsThread.start(ble_events);
+    //start polling thread
+    ble.start(ble_thread);
 
 
 }
@@ -125,15 +125,12 @@ void ble_thread(){
  * @note This function should be called after initializing the BLE module.
  */
 void ble_loop(){
+    //constantly poll for ble events
     while(1){
+        bleMutex.lock();
 
-        //poll ble for events / changes
->>>>>>> Stashed changes
+        //poll for ble events
         BLE.poll();
-
-        //sleep for 50ms
-        rtos::ThisThread::sleep_for(50);
-
     }
 }
 
