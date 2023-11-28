@@ -37,6 +37,7 @@ public:
   void setDirection(Direction dir);
   Direction getDirection() const;
   void setSpeed(int speed);
+  void stop();
   int getSpeed() const;
   void updateEncoder();
   int getSteps() const;

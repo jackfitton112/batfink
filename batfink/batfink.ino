@@ -12,6 +12,7 @@
 #include "src/batfink/batfink.h"
 #include "src/MotorControl/MotorControl.h"
 #include "src/usonic/usonic.h"
+#include "src/pid/pid.h"
 //#include "motors.h"
 //#include "drive.h"
 
@@ -50,7 +51,7 @@ void loop() {
     }
     else {
         //otherwise, go forward
-        forward();
+        goForwardPid(front - 10, 3);
     }
 
 

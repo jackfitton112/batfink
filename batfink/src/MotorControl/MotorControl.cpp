@@ -117,6 +117,10 @@ void Motor::setTargetSteps(int steps) {
     _prevSteps = _steps; // This will allow us to calculate the number of steps taken since the last time we set the target
 }
 
+void Motor::stop() {
+    analogWrite(_pwmPin, 0);
+}
+
 
 // ISR handlers need to be global
 Motor *leftMotor;
