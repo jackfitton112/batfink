@@ -7,13 +7,19 @@
 #include "usonic.h"
 #include "motors.h"
 #include "ble.h"
+<<<<<<< Updated upstream
 #include "drive.h"
+=======
+
+
+>>>>>>> Stashed changes
 
 void setup(){
 
     //setup motors
     Motor_setup();
 
+<<<<<<< Updated upstream
     //setup bluetooth
     setup_ble();
 
@@ -21,6 +27,8 @@ void setup(){
     ble.start(ble_thread);
     ble_worker.start(ble_worker_thread);
 
+=======
+>>>>>>> Stashed changes
     Serial.begin(9600);
 
     //start usonic thread
@@ -30,6 +38,9 @@ void setup(){
 
     //start motor thread
     motorThread.start(motorDrive);
+
+    //setup ble
+    ble_setup();
 
 
 }
