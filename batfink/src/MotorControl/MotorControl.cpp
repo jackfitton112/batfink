@@ -12,8 +12,8 @@
 
 
 //TODO: make these values be dynamic via PID
-int MOTOR_LEFT = 30;
-int MOTOR_RIGHT = 30;
+int MOTOR_LEFT = 200;
+int MOTOR_RIGHT = 200;
 
 
 
@@ -185,8 +185,8 @@ void left() {
   leftMotor->setDirection(CCW);
   rightMotor->resetEncoder();
   leftMotor->resetEncoder();
-  rightMotor->setSpeed(127);  // Assuming half speed for turning, adjust as needed
-  leftMotor->setSpeed(127);
+  rightMotor->setSpeed(50);  // Assuming half speed for turning, adjust as needed
+  leftMotor->setSpeed(50);
 }
 
 /**
@@ -199,8 +199,8 @@ void right() {
   leftMotor->setDirection(CW);
   rightMotor->resetEncoder();
   leftMotor->resetEncoder();
-  rightMotor->setSpeed(127);  // Assuming half speed for turning, adjust as needed
-  leftMotor->setSpeed(127);
+  rightMotor->setSpeed(50);  // Assuming half speed for turning, adjust as needed
+  leftMotor->setSpeed(50);
 }
 
 /**
@@ -340,3 +340,65 @@ void turnAngle(int angle){
 
 
 }
+
+void turn90deg(int direction){
+
+    //also as the sensors are equidistant from the centre of the robot, we can use the same calculation for turning 90 degrees
+    //the front sensor value should be equal to the left sensor when the robot is turning right 90 degrees
+    //the front sensor value should be equal to the right sensor when the robot is turning left 90 degrees
+
+    //0 = left, 1 = right for direction
+
+
+    //get front sensor distance for comparison
+    sensorMutex.lock();
+    int front = sensorData->front;
+    sensorMutex.unlock();
+
+    if (direction == 0){
+        //set drive direction to left
+        motorMutex.lock();
+        drive_direction = 3;
+        motorMutex.unlock();
+    } else {
+        //set drive direction to right
+        motorMutex.lock();
+        drive_direction = 4;
+        motorMutex.unlock();
+    }
+
+    //wait until the front sensor value is equal to the left or right sensor value
+    while(1){
+
+        if (direction == 0){
+            //get right sensor distance for comparison
+            sensorMutex.lock();
+            int right = sensorData->right;
+            sensorMutex.unlock();
+            if (right < (front + 2) && right > (front - 2)){
+                break;
+            }
+        } else {
+            //get left sensor distance for comparison
+            sensorMutex.lock();
+            int left = sensorData->left;
+            sensorMutex.unlock();
+            if (left < (front + 2) && left > (front - 2)){
+                break;
+            }
+        }
+
+        //sleep for 5ms
+        rtos::ThisThread::sleep_for(5);
+
+    }
+
+    //stop the robot
+    motorMutex.lock();
+    drive_direction = 0;
+    motorMutex.unlock();
+
+
+
+}
+

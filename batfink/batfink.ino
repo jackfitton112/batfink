@@ -44,20 +44,16 @@ void loop() {
     int front = sensorData->front;
     sensorMutex.unlock();
 
-    if (front < 10){
-        //stop the robot
-        motorMutex.lock();
-        drive_direction = 0;
-        motorMutex.unlock();
-  
-    } else {
-
-    //drive forward to 5cm away from wall
-    driveDistance(front - 5);
-
-
+    //if distance is less than 10cm, turn left
+    if (front < 15){
+        turn90deg(0);
+    }
+    else {
+        //otherwise, go forward
+        forward();
     }
 
+
     //non blocking delay
-    rtos::ThisThread::sleep_for(1000);
+    rtos::ThisThread::sleep_for(50);
 }

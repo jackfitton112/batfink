@@ -15,6 +15,7 @@
 #include <Arduino.h>
 #include <ARB.h>
 #include <mbed.h>
+#include "../usonic/usonic.h"
 
 // directios
 enum Direction {CW, CCW}; 
@@ -75,5 +76,6 @@ extern int drive_direction; // 0 = stop, 1 = forward, 2 = backward, 3 = left, 4 
 void motorDriveThread();
 void driveDistance(int distance);
 void turnAngle(int angle);
+void turn90deg(int direction);
 
 #endif
