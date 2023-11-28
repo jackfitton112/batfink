@@ -18,7 +18,7 @@ mbed::DigitalInOut leftSensor(P1_13);
 
 
 // Define sensor data struct
-sensorDatas *sensorData = new sensorDatas;
+sensorDataStruct* sensorData = new sensorDataStruct;
 
 // Define sensorMutex variable
 rtos::Mutex sensorMutex;
@@ -28,8 +28,16 @@ rtos::Thread sensorThread;
 
 
 void Usonic_setup(){
+
+    //setup structs
+    sensorData->front = 0;
+    sensorData->left = 0;
+    sensorData->right = 0;
+
     //set up the sensor thread
     sensorThread.start(getSensorDataThread);
+
+
 }
 
 

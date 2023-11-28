@@ -14,6 +14,7 @@
 
 #include <Arduino.h>
 #include <ARB.h>
+#include <mbed.h>
 
 // directios
 enum Direction {CW, CCW}; 
@@ -32,19 +33,14 @@ private:
 
 public:
   Motor(int dirPin, int pwmPin, int encPin, int forwardMultiplier);
-
-
   void setDirection(Direction dir);
   Direction getDirection() const;
-  
   void setSpeed(int speed);
   int getSpeed() const;
-  
   void updateEncoder();
   int getSteps() const;
   void resetEncoder();
   void setTargetSteps(int steps);
-
   inline int getEncPin() const { return _encPin; }
 };
 
@@ -71,5 +67,13 @@ void Motor_setup();
 
 // Cleanup function (if necessary)
 void cleanup();
+
+// Motor drive thread functions
+extern rtos::Thread motorThread;
+extern rtos::Mutex motorMutex;
+extern int drive_direction; // 0 = stop, 1 = forward, 2 = backward, 3 = left, 4 = right
+void motorDriveThread();
+void driveDistance(int distance);
+void turnAngle(int angle);
 
 #endif

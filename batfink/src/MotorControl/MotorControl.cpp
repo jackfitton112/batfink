@@ -12,11 +12,22 @@
 
 
 //TODO: make these values be dynamic via PID
-int MOTOR_LEFT = 200;
-int MOTOR_RIGHT = 200;
+int MOTOR_LEFT = 30;
+int MOTOR_RIGHT = 30;
 
 
 
+/**
+ * @brief Motor class constructor.
+ * 
+ * This constructor initializes the Motor object with the specified pins and parameters.
+ * It sets the pin modes, initializes the member variables, and configures the initial state of the motor.
+ * 
+ * @param dirPin The pin number for the direction control.
+ * @param pwmPin The pin number for the PWM control.
+ * @param encPin The pin number for the encoder input.
+ * @param forwardMultiplier The multiplier for forward movement.
+ */
 Motor::Motor(int dirPin, int pwmPin, int encPin, int forwardMultiplier)
     : _dirPin(dirPin), _pwmPin(pwmPin), _encPin(encPin), _dir(CW), _steps(0), _speed(0), _forwardMultiplier(forwardMultiplier) 
 {
@@ -27,24 +38,50 @@ Motor::Motor(int dirPin, int pwmPin, int encPin, int forwardMultiplier)
     analogWrite(_pwmPin, 0);
 }
 
+/**
+ * @brief Sets the direction of the motor.
+ * 
+ * @param dir The direction to set the motor to.
+ */
 void Motor::setDirection(Direction dir) {
     _dir = dir;
     digitalWrite(_dirPin, _dir);
 }
 
+/**
+ * @brief Gets the direction of the motor.
+ * 
+ * @return Direction The direction of the motor.
+ */
 Direction Motor::getDirection() const {
     return _dir;
 }
 
+/**
+ * @brief Sets the speed of the motor.
+ * 
+ * @param speed The speed to set the motor to.
+ */
 void Motor::setSpeed(int speed) {
     _speed = speed;
     analogWrite(_pwmPin, _speed);
 }
 
+/**
+ * @brief Gets the speed of the motor.
+ * 
+ * @return int The speed of the motor.
+ */
 int Motor::getSpeed() const {
     return _speed;
 }
 
+/**
+ * @brief Updates the encoder value of the motor.
+ * 
+ * This function is called when an interrupt is triggered by the encoder.
+ * It updates the encoder value of the motor based on the direction of the motor.
+ */
 void Motor::updateEncoder() {
     if((_dir == CW && _forwardMultiplier == 1) || (_dir == CCW && _forwardMultiplier == -1)) {
         _steps++;
@@ -53,15 +90,28 @@ void Motor::updateEncoder() {
     }
 }
 
-
+/**
+ * @brief Gets the current encoder value of the motor.
+ * 
+ * @return int The current encoder value of the motor.
+ */
 int Motor::getSteps() const {
     return _steps;
 }
 
+/**
+ * @brief Resets the encoder value of the motor to 0.
+ * 
+ */
 void Motor::resetEncoder() {
     _steps = 0;
 }
 
+/**
+ * @brief Sets the target encoder value of the motor.
+ * 
+ * @param steps The target encoder value of the motor.
+ */
 void Motor::setTargetSteps(int steps) {
     _targetSteps = steps;
     _prevSteps = _steps; // This will allow us to calculate the number of steps taken since the last time we set the target
@@ -72,15 +122,30 @@ void Motor::setTargetSteps(int steps) {
 Motor *leftMotor;
 Motor *rightMotor;
 
+/**
+ * @brief Interrupt service routine for ENCA.
+ * This function is called when an interrupt is triggered by ENCA.
+ * It updates the encoder value of the right motor.
+ */
 void ENCA_ISR() {
   rightMotor->updateEncoder();
 }
 
+/**
+ * @brief Interrupt service routine for ENCB.
+ * This function is called when an interrupt is triggered by ENCB.
+ * It updates the encoder value of the left motor.
+ */
 void ENCB_ISR() {
   leftMotor->updateEncoder();
 }
 
-
+/**
+ * @brief Sets up the motor control.
+ * 
+ * This function creates the leftMotor and rightMotor objects and attaches the encoder ISRs to the encoder pins.
+ * It also starts the motor drive thread.
+ */
 void Motor_setup() {
     // For left motor, forward direction is CW, so forwardMultiplier is 1
     leftMotor = new Motor(MOTOR_DIRB, MOTOR_PWMB, MOTOR_ENCB, 1);
@@ -90,9 +155,16 @@ void Motor_setup() {
 
     attachInterrupt(digitalPinToInterrupt(leftMotor->getEncPin()), ENCB_ISR, CHANGE);
     attachInterrupt(digitalPinToInterrupt(rightMotor->getEncPin()), ENCA_ISR, CHANGE);
+
+    //start motor drive thread
+    motorThread.start(motorDriveThread);
 }
 
 
+/**
+ * @brief Moves the robot forward by setting the direction of the motors and the speed.
+ * 
+ */
 void forward() {
   //Serial.println("Moving Forward");
   rightMotor->setDirection(CCW);
@@ -103,6 +175,10 @@ void forward() {
   leftMotor->setSpeed(MOTOR_LEFT);
 }
 
+/**
+ * @brief Moves the robot left by setting the direction of the motors and the speed.
+ * 
+ */
 void left() {
   //Serial.println("Turning Left");
   rightMotor->setDirection(CCW);
@@ -113,6 +189,10 @@ void left() {
   leftMotor->setSpeed(127);
 }
 
+/**
+ * @brief Turns the robot right by setting the direction of the motors and the speed.
+ * 
+ */
 void right() {
   //Serial.println("Turning Right");
   rightMotor->setDirection(CW);
@@ -123,6 +203,10 @@ void right() {
   leftMotor->setSpeed(127);
 }
 
+/**
+ * @brief Moves the robot backward by setting the direction of the motors and the speed.
+ * 
+ */
 void backward() {
   //Serial.println("Moving Backward");
   rightMotor->setDirection(CW);
@@ -133,6 +217,10 @@ void backward() {
   leftMotor->setSpeed(MOTOR_LEFT);
 }
 
+/**
+ * @brief Stops the robot by setting the speed of both motors to 0.
+ * 
+ */
 void stopRobot() {
   //Serial.println("Stopping");
   rightMotor->setSpeed(0);
@@ -140,8 +228,115 @@ void stopRobot() {
 }
 
 
-// Make sure to delete the motors in a cleanup function if needed
+
+/**
+ * @brief Cleans up the resources used by the motor control.
+ * 
+ * This function deletes the leftMotor and rightMotor objects, freeing up the memory they occupy.
+ */
 void cleanup() {
   delete leftMotor;
   delete rightMotor;
+}
+
+
+
+rtos::Thread motorThread;
+rtos::Mutex motorMutex;
+int drive_direction = 0; // 0 = stop, 1 = forward, 2 = backward, 3 = left, 4 = right
+
+/**
+ * @brief This function is a thread that controls the motor drive based on the drive direction.
+ * 
+ * It continuously checks the drive direction and drives the motor accordingly.
+ * The drive direction is obtained from a shared variable and is protected by a mutex.
+ * The motor is driven in the specified direction using different motor control functions.
+ * The thread sleeps for 100ms after each iteration.
+ */
+void motorDriveThread(){
+    int prev_dir = 0;
+    while(1){
+
+        //take mutex and check drive direction
+        motorMutex.lock();
+        int dir = drive_direction;
+        motorMutex.unlock();
+
+        //drive in the direction specified
+        if (dir != prev_dir){
+            prev_dir = dir;
+            switch(dir){
+                case 0:
+                    stopRobot();
+                    break;
+                case 1:
+                    forward();
+                    break;
+                case 2:
+                    backward();
+                    break;
+                case 3:
+                    left();
+                    break;
+                case 4:
+                    right();
+                    break;
+                default:
+                    stopRobot();
+                    break;
+            }
+        }
+
+        //sleep for 100ms
+        rtos::ThisThread::sleep_for(100);
+
+    }
+
+}
+
+
+
+void driveDistance(int distance){
+    //Motors are 298:1 ratio, 6 counts per revolution
+    // 1 revolution = 298 * 12 = 3576 counts
+    // wheel is 40mm diameter, 125mm circumference
+    // 1 revolution = 125mm
+    // 1 count = 125/3576 = 0.035mm
+
+    int target = distance / 0.035;
+
+    //set target steps
+    leftMotor->setTargetSteps(target);
+    rightMotor->setTargetSteps(target);
+
+    //set drive direction to forward
+    motorMutex.lock();
+    drive_direction = 1;
+    motorMutex.unlock();
+
+}
+
+void turnAngle(int angle){
+    //Motors are 298:1 ratio, 6 counts per revolution
+    // 1 revolution = 298 * 12 = 3576 counts
+    // wheel is 40mm diameter, 125mm circumference
+    // 1 revolution = 125mm
+    // 1 count = 125/3576 = 0.035mm
+
+    //robot is 150mm wide
+    // 1 revolution = 471mm
+    // 1 count = 471/3576 = 0.132mm
+
+    int target = (angle / 360) * 0.132;
+
+    //set target steps
+    leftMotor->setTargetSteps(target);
+    rightMotor->setTargetSteps(target);
+
+    //set drive direction to forward
+    motorMutex.lock();
+    drive_direction = 3;
+    motorMutex.unlock();
+
+
 }

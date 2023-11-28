@@ -15,14 +15,14 @@
 #include <mbed.h>
 
 // Declare sensor data struct
-struct sensorDatas {
+struct sensorDataStruct {
     int front;
     int left;
     int right;
 };
 
 // Declare sensor data extern variable
-extern sensorDatas *sensorData;
+extern sensorDataStruct* sensorData;
 
 // Declare sensorMutex extern variable
 extern rtos::Mutex sensorMutex;

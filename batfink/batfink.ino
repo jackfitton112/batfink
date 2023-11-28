@@ -41,15 +41,22 @@ void loop() {
 
     //take mutex and get the sensor data
     sensorMutex.lock();
-    //print sensor data
-    Serial.print("Front: ");
-    Serial.print(sensorData->front);
-    Serial.print(" Left: ");
-    Serial.print(sensorData->left);
-    Serial.print(" Right: ");
-    Serial.println(sensorData->right);
+    int front = sensorData->front;
     sensorMutex.unlock();
 
+    if (front < 10){
+        //stop the robot
+        motorMutex.lock();
+        drive_direction = 0;
+        motorMutex.unlock();
+  
+    } else {
+
+    //drive forward to 5cm away from wall
+    driveDistance(front - 5);
+
+
+    }
 
     //non blocking delay
     rtos::ThisThread::sleep_for(1000);
