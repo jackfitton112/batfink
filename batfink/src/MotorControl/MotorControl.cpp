@@ -1,12 +1,21 @@
-//MotorControl.cpp
+/**
+ * @file MotorControl.cpp
+ * @author Jack Fitton (jf1595@york.ac.uk)
+ * @brief  Motor Control source file
+ * @version 0.1
+ * @date 28-11-2023
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #include "MotorControl.h"
-#include <Arduino.h>
-#include <ARB.h>
 
+
+//TODO: make these values be dynamic via PID
 int MOTOR_LEFT = 200;
 int MOTOR_RIGHT = 200;
 
-// No redefinition of the Motor class here!
+
 
 Motor::Motor(int dirPin, int pwmPin, int encPin, int forwardMultiplier)
     : _dirPin(dirPin), _pwmPin(pwmPin), _encPin(encPin), _dir(CW), _steps(0), _speed(0), _forwardMultiplier(forwardMultiplier) 

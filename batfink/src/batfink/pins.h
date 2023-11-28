@@ -1,6 +1,13 @@
-//pins.h
-// contains all of the pin defs for the batfink robot
-
+/**
+ * @file pins.h
+ * @author Jack Fitton (jf1595@york.ac.uk)
+ * @brief Pin definitions header file
+ * @version 0.1
+ * @date 28-11-2023
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 
 //ultra sonic sensors, these pins are wired to both trig and echo
 #define USONIC1 D7

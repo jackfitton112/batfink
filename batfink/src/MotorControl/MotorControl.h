@@ -1,4 +1,16 @@
-#pragma once
+/**
+ * @file MotorControl.h
+ * @author Jack Fitton (jf1595@york.ac.uk)
+ * @brief  Motor Control header file
+ * @version 0.1
+ * @date 28-11-2023
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
+
+#ifndef MOTORCONTROL_H
+#define MOTORCONTROL_H
 
 #include <Arduino.h>
 #include <ARB.h>
@@ -44,7 +56,7 @@ extern int MOTOR_RIGHT;
 void ENCA_ISR();
 void ENCB_ISR();
 
-// Movement functions
+// Movement function prototypes
 void forward();
 void backward();
 void left();
@@ -56,3 +68,5 @@ void Motor_setup();
 
 // Cleanup function (if necessary)
 void cleanup();
+
+#endif
