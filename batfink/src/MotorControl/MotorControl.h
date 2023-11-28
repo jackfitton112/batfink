@@ -27,6 +27,8 @@ private:
   volatile int _steps;
   int _speed;
   int _forwardMultiplier;  // Either 1 or -1
+  int _prevSteps;
+  int _targetSteps;
 
 public:
   Motor(int dirPin, int pwmPin, int encPin, int forwardMultiplier);
@@ -41,6 +43,7 @@ public:
   void updateEncoder();
   int getSteps() const;
   void resetEncoder();
+  void setTargetSteps(int steps);
 
   inline int getEncPin() const { return _encPin; }
 };
