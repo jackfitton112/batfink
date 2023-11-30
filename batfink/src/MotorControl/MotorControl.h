@@ -77,5 +77,7 @@ void motorDriveThread();
 void driveDistance(int distance);
 void turnAngle(int angle);
 void turn90deg(int direction);
+void stop();
+void findGreatestPath();
 
 #endif

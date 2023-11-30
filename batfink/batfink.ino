@@ -28,6 +28,7 @@ void setup(){
 
 
 
+
 }
 
 
@@ -42,16 +43,30 @@ void loop() {
     //take mutex and get the sensor data
     sensorMutex.lock();
     int front = sensorData->front;
+    int left = sensorData->left;
+    int right = sensorData->right;
     sensorMutex.unlock();
 
-    //if distance is less than 10cm, turn left
-    if (front < 15){
-        turn90deg(0);
-    }
-    else {
-        //otherwise, go forward
+    //if the front sensor is less than 10cm away
+    if(front < 10 && front > 0){
+        //find the greatest path
+        if(left > right){
+            //turn left
+            turn90deg(1);
+        } else {
+            //turn right
+            turn90deg(0);
+        }
+  
+    } else {
+        //drive forward
+        Serial.println(front);
         forward();
     }
+
+
+
+    
 
 
     //non blocking delay

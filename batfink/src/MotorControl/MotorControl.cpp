@@ -309,88 +309,20 @@ void driveDistance(int distance){
     leftMotor->setTargetSteps(target);
     rightMotor->setTargetSteps(target);
 
+    //reset the encoders
+
     //set drive direction to forward
     motorMutex.lock();
     drive_direction = 1;
     motorMutex.unlock();
 
-}
+    //wait for the motors to hit the target
+    while(abs(leftMotor->getSteps()) < target && abs(rightMotor->getSteps() < target)){
+        Serial.print(leftMotor->getSteps());
+        Serial.print(",");
+        Serial.println(rightMotor->getSteps());
 
-void turnAngle(int angle){
-    //Motors are 298:1 ratio, 6 counts per revolution
-    // 1 revolution = 298 * 12 = 3576 counts
-    // wheel is 40mm diameter, 125mm circumference
-    // 1 revolution = 125mm
-    // 1 count = 125/3576 = 0.035mm
-
-    //robot is 150mm wide
-    // 1 revolution = 471mm
-    // 1 count = 471/3576 = 0.132mm
-
-    int target = (angle / 360) * 0.132;
-
-    //set target steps
-    leftMotor->setTargetSteps(target);
-    rightMotor->setTargetSteps(target);
-
-    //set drive direction to forward
-    motorMutex.lock();
-    drive_direction = 3;
-    motorMutex.unlock();
-
-
-}
-
-void turn90deg(int direction){
-
-    //also as the sensors are equidistant from the centre of the robot, we can use the same calculation for turning 90 degrees
-    //the front sensor value should be equal to the left sensor when the robot is turning right 90 degrees
-    //the front sensor value should be equal to the right sensor when the robot is turning left 90 degrees
-
-    //0 = left, 1 = right for direction
-
-
-    //get front sensor distance for comparison
-    sensorMutex.lock();
-    int front = sensorData->front;
-    sensorMutex.unlock();
-
-    if (direction == 0){
-        //set drive direction to left
-        motorMutex.lock();
-        drive_direction = 3;
-        motorMutex.unlock();
-    } else {
-        //set drive direction to right
-        motorMutex.lock();
-        drive_direction = 4;
-        motorMutex.unlock();
-    }
-
-    //wait until the front sensor value is equal to the left or right sensor value
-    while(1){
-
-        if (direction == 0){
-            //get right sensor distance for comparison
-            sensorMutex.lock();
-            int right = sensorData->right;
-            sensorMutex.unlock();
-            if (right < (front + 2) && right > (front - 2)){
-                break;
-            }
-        } else {
-            //get left sensor distance for comparison
-            sensorMutex.lock();
-            int left = sensorData->left;
-            sensorMutex.unlock();
-            if (left < (front + 2) && left > (front - 2)){
-                break;
-            }
-        }
-
-        //sleep for 5ms
-        rtos::ThisThread::sleep_for(5);
-
+        rtos::ThisThread::sleep_for(10);
     }
 
     //stop the robot
@@ -398,6 +330,149 @@ void turn90deg(int direction){
     drive_direction = 0;
     motorMutex.unlock();
 
+
+
+    
+
+}
+
+void turnAngle(int angle, int direction){
+    //Motors are 298:1 ratio, 2 step per revolution
+    //1 rev = 720
+
+    //wheels are 150mm apart and in the centre of the robot
+
+    //1140 is 90 degrees
+    //5760 is 360 degrees
+    int TARGET = 5760 * (angle / 360);
+    leftMotor->setTargetSteps(TARGET);
+    rightMotor->setTargetSteps(TARGET);
+
+    //Reset the encoders
+    leftMotor->resetEncoder();
+    rightMotor->resetEncoder();
+
+    //set drive direction to left
+    if (direction == 0){
+        motorMutex.lock();
+        drive_direction = 4;
+        motorMutex.unlock();
+    } else {
+        motorMutex.lock();
+        drive_direction = 3;
+        motorMutex.unlock();
+    }
+
+    //wait for the motors to turn 1 revolution
+    while(abs(leftMotor->getSteps()) < TARGET && abs(rightMotor->getSteps() < TARGET)){
+        Serial.print(leftMotor->getSteps());
+        Serial.print(",");
+        Serial.println(rightMotor->getSteps());
+
+        rtos::ThisThread::sleep_for(10);
+    }
+
+    //stop the robot
+    motorMutex.lock();
+    drive_direction = 0;
+    motorMutex.unlock();
+
+
+
+
+}
+
+/**
+ * @brief Turns the robot 90 degrees in the specified direction.
+ * 
+ * @param direction The direction to turn (0 for left, 1 for right).
+ */
+void turn90deg(int direction){
+    //Motors are 298:1 ratio, 2 step per revolution
+    //1 rev = 720
+
+    //wheels are 150mm apart and in the centre of the robot
+
+    //TESTING - TURN THE WHEELS 1 REVOLUTION - This does 255 degrees
+    //each degree is 16 syeps 
+    //set target steps
+    int TARGET = 710*2;
+    leftMotor->setTargetSteps(TARGET);
+    rightMotor->setTargetSteps(TARGET);
+
+    //Reset the encoders
+    leftMotor->resetEncoder();
+    rightMotor->resetEncoder();
+
+    //set drive direction to left
+    if (direction == 0){
+        motorMutex.lock();
+        drive_direction = 4;
+        motorMutex.unlock();
+    } else {
+        motorMutex.lock();
+        drive_direction = 3;
+        motorMutex.unlock();
+    }
+
+    //wait for the motors to turn 1 revolution
+    while(abs(leftMotor->getSteps()) < TARGET && abs(rightMotor->getSteps() < TARGET)){
+        Serial.print(leftMotor->getSteps());
+        Serial.print(",");
+        Serial.println(rightMotor->getSteps());
+
+        rtos::ThisThread::sleep_for(10);
+    }
+
+    //stop the robot
+    motorMutex.lock();
+    drive_direction = 0;
+    motorMutex.unlock();
+
+
+
+}
+
+
+void stop(){
+        motorMutex.lock();
+        drive_direction = 0;
+        motorMutex.unlock();
+}
+
+
+void findGreatestPath(){
+
+
+    int distances[4];
+    int angles[4];
+
+    //get turn 90 degreees and get the distances
+    for(int i = 0; i < 4; i++){
+        turn90deg(0);
+        rtos::ThisThread::sleep_for(1000);
+        distances[i] = sensorData->front;
+        angles[i] = i * 90;
+    }
+
+    //find the greatest distance
+    int greatest = 0;
+    int greatest_angle = 0;
+
+    for(int i = 0; i < 4; i++){
+        if(distances[i] > greatest){
+            greatest = distances[i];
+            greatest_angle = angles[i];
+        }
+    }
+
+    //turn to the greatest angle in lots of 90
+    int amount_of_turns = greatest_angle / 90;
+
+    for (int i = 0; i < amount_of_turns; i++){
+        turn90deg(0);
+        rtos::ThisThread::sleep_for(1000);
+    }
 
 
 }
