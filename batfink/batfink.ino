@@ -51,7 +51,7 @@ void loop() {
     }
     else {
         //otherwise, go forward
-        goForwardPid(front - 10, 3);
+        goForward();
     }
 
 
