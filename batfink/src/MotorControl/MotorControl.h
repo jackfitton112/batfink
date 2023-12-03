@@ -12,72 +12,72 @@
 #ifndef MOTORCONTROL_H
 #define MOTORCONTROL_H
 
-#include <Arduino.h>
-#include <ARB.h>
 #include <mbed.h>
-#include "../usonic/usonic.h"
 
-// directios
-enum Direction {CW, CCW}; 
 
+#define CCW true
+#define CW false
+#define VEL true
+#define POS false
+
+#define ENC_CPR 3576 //encoder counts per revolution (6 counts per motor revolution * 298:1 gear ratio)
+#define VEL_TICKER_PERIOD 0.1 //ticker period for velocity calculation
+
+
+//MotorControl class (using mbed)
 class Motor {
-private:
-  int _dirPin;
-  int _pwmPin;
-  int _encPin;
-  Direction _dir;
-  volatile int _steps;
-  int _speed;
-  int _forwardMultiplier;  // Either 1 or -1
-  int _prevSteps;
-  int _targetSteps;
 
-public:
-  Motor(int dirPin, int pwmPin, int encPin, int forwardMultiplier);
-  void setDirection(Direction dir);
-  Direction getDirection() const;
-  void setSpeed(int speed);
-  int getSpeed() const;
-  void updateEncoder();
-  int getSteps() const;
-  void resetEncoder();
-  void setTargetSteps(int steps);
-  inline int getEncPin() const { return _encPin; }
-};
+  public:
 
-// Global motor objects
-extern Motor* leftMotor;
-extern Motor* rightMotor;
+    //constructor
+    Motor(PinName pwmPin, PinName dirPin, PinName encPin);
 
-extern int MOTOR_LEFT;
-extern int MOTOR_RIGHT;
+    //functions
+    void setup(); //initialises motor
+    void setVel(float vel); //sets velocity of motor in rev/min
+    void setPos(int pos); //sets position of motor - eg X mm driven
 
-// ISR handlers for encoders
-void ENCA_ISR();
-void ENCB_ISR();
+    float getVel(); //gets velocity of motor in rev/min
+    int getPos(); //gets position of motor - eg X mm driven
+    void setPWM(float pwm); //sets pwm of motor
 
-// Movement function prototypes
-void forward();
-void backward();
-void left();
-void right();
-void stopRobot();
+  private:
 
-// Setup function
-void Motor_setup();
+    //pins
+    mbed::PwmOut pwmPin; //sends pwm signal to motor 
+    mbed::DigitalOut dirPin; //sets direction of motor
+    mbed::InterruptIn encPin; //reads encoder input
 
-// Cleanup function (if necessary)
-void cleanup();
 
-// Motor drive thread functions
-extern rtos::Thread motorThread;
-extern rtos::Mutex motorMutex;
-extern int drive_direction; // 0 = stop, 1 = forward, 2 = backward, 3 = left, 4 = right
-void motorDriveThread();
-void driveDistance(int distance);
-void turnAngle(int angle);
-void turn90deg(int direction);
-void stop();
-void findGreatestPath();
+    //variables
+    int32_t encCount; //encoder count
+    int32_t encCountPrev; //previous encoder count
+    int16_t Velocity; //velocity of motor in rev/min
+    int16_t Position; //position of motor in rev
+
+    bool dir; //direction of motor
+    bool driveType; //drive type of the motor, true = velocity, false = position
+
+    mbed::Ticker velTicker; //ticker for velocity calculation
+
+    int TargetPos; //target position of motor
+    float TargetVel; //target velocity of motor in rev/min
+
+    //functions
+    //setters and getters
+    void setDir(bool dir); //sets direction of motor
+    //void setPWM(float pwm); //sets pwm of motor
+    bool getDir(); //gets direction of motor
+    float getPWM(); //gets pwm of motor
+
+    //ISR
+    void encISR(); //encoder interrupt service routine
+
+    //private functions
+    void setDriveType(bool driveType); //sets drive type of motor
+    void calcVel(); //calculates velocity of motor
+    void calcPos(); //calculates position of motor
+    void setPwm(float pwm); //sets pwm of motor (private
+  };
 
 #endif
