@@ -16,7 +16,8 @@
 //#include "motors.h"
 //#include "drive.h"
 
-Motor leftMotor(MBED_MOTOR_PWMA, MBED_MOTOR_DIRA, MBED_MOTOR_ENCA);
+Motor leftMotor(MBED_MOTOR_PWMA, MBED_MOTOR_DIRA, MBED_MOTOR_ENCA, CCW);
+Motor rightMotor(MBED_MOTOR_PWMB, MBED_MOTOR_DIRB, MBED_MOTOR_ENCB, CW);
 
 
 void setup(){
@@ -24,19 +25,15 @@ void setup(){
     //setup motors
     //Motor_setup();
     leftMotor.setup();
+    rightMotor.setup();
     //setup usonic
     //Usonic_setup();
 
     Serial.begin(9600);
 
-    //set motor pwm
-    leftMotor.setPWM(0.1);
-
-
-
-
-
-
+    //set motortarget velocity in wheel rev/min
+    leftMotor.setTargetVel(10);
+    rightMotor.setTargetVel(10);
 
 }
 

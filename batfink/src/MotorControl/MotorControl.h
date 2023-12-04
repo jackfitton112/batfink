@@ -23,6 +23,11 @@
 #define ENC_CPR 3576 //encoder counts per revolution (6 counts per motor revolution * 298:1 gear ratio)
 #define VEL_TICKER_PERIOD 0.1 //ticker period for velocity calculation
 
+//pid constants
+#define KP 0.0003
+#define KI 0
+#define KD 0.002
+
 
 //MotorControl class (using mbed)
 class Motor {
@@ -30,7 +35,7 @@ class Motor {
   public:
 
     //constructor
-    Motor(PinName pwmPin, PinName dirPin, PinName encPin);
+    Motor(PinName pwmPin, PinName dirPin, PinName encPin, bool Fwd_dir);
 
     //functions
     void setup(); //initialises motor
@@ -40,6 +45,7 @@ class Motor {
     float getVel(); //gets velocity of motor in rev/min
     int getPos(); //gets position of motor - eg X mm driven
     void setPWM(float pwm); //sets pwm of motor
+    void setTargetVel(float vel); //sets target velocity of motor in rev/min
 
   private:
 
@@ -57,11 +63,19 @@ class Motor {
 
     bool dir; //direction of motor
     bool driveType; //drive type of the motor, true = velocity, false = position
+    bool fwd_dir; //forward direction of motor
 
     mbed::Ticker velTicker; //ticker for velocity calculation
 
     int TargetPos; //target position of motor
     float TargetVel; //target velocity of motor in rev/min
+
+    //pid
+    float error; //error
+    float errorPrev; //previous error
+    float integral; //integral
+    float derivative; //derivative
+
 
     //functions
     //setters and getters
@@ -78,6 +92,7 @@ class Motor {
     void calcVel(); //calculates velocity of motor
     void calcPos(); //calculates position of motor
     void setPwm(float pwm); //sets pwm of motor (private
+    int pid(float target, float error); //pid controller (private
   };
 
 #endif
