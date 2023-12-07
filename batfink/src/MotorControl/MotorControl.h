@@ -25,7 +25,7 @@
 
 //pid constants
 #define KP 0.001
-#define KI 0.01
+#define KI 0.1
 #define KD 0
 
 

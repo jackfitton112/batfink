@@ -33,7 +33,8 @@ void setup(){
 
     //set motor pwm
     //leftMotor.setPWM(0.5);
-    rightMotor.setDir(CW);
+    rightMotor.setDir(CCW);
+    leftMotor.setDir(CW);
   
 
     //set motortarget velocity in wheel rev/min

@@ -60,7 +60,7 @@ void Motor::setTargetPos(int pos) {
 }
 
 void Motor::setTargetVel(float vel) {
-    TargetVel = vel;
+    TargetVel = vel * ENC_CPR / 600; //convert velocity from wheel rev/min to encoder counts per 100ms
     driveType = VEL;
 }
 
@@ -94,8 +94,9 @@ bool Motor::getDir() {
 //private functions
 
 void Motor::calcVel() {
-    //calculate velocity
-    Velocity = (encCount - encCountPrev) * 10 * 60 / 64; //calculate velocity in rev/min
+    //calculate velocity in rev/min - this is called every 100ms therefore /10 to get rev/s
+    //per revolution of the wheel, the encoder counts 3576 times
+    Velocity = (encCount - encCountPrev);
     encCountPrev = encCount; //set previous encoder count to current encoder count
     if (driveType == VEL) {
         PID();
