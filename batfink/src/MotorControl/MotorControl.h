@@ -24,9 +24,9 @@
 #define VEL_TICKER_PERIOD 0.1 //ticker period for velocity calculation
 
 //pid constants
-#define KP 0.0003
-#define KI 0
-#define KD 0.002
+#define KP 0.001
+#define KI 0.01
+#define KD 0
 
 
 //MotorControl class (using mbed)
@@ -34,18 +34,28 @@ class Motor {
 
   public:
 
-    //constructor
-    Motor(PinName pwmPin, PinName dirPin, PinName encPin, bool Fwd_dir);
-
-    //functions
+    //constructor & setup
+    Motor(PinName pwmPin, PinName dirPin, PinName encPin, bool Fwd_dir); //constructor
     void setup(); //initialises motor
-    void setVel(float vel); //sets velocity of motor in rev/min
-    void setPos(int pos); //sets position of motor - eg X mm driven
 
-    float getVel(); //gets velocity of motor in rev/min
-    int getPos(); //gets position of motor - eg X mm driven
-    void setPWM(float pwm); //sets pwm of motor
-    void setTargetVel(float vel); //sets target velocity of motor in rev/min
+    //setters and getters
+
+    //setters
+    void setTargetPos(int pos); //sets target position of motor in wheel revolutions
+    void setTargetVel(float vel); //sets target velocity of motor in wheel revolutions per minute
+    void setDir(bool dir); //sets direction of motor (CW or CCW)
+
+    //getters
+
+    float getVel(); //returns velocity of motor in wheel revolutions per minute
+    int getPos(); //returns position of motor in wheel revolutions
+    float getTargetVel(); //returns target velocity of motor in wheel revolutions per minute
+    int getTargetPos(); //returns target position of motor in wheel revolutions
+    bool getDir(); //returns direction of motor (CW or CCW)
+
+    float PIDerror;
+    float PIDpwm;
+
 
   private:
 
@@ -78,21 +88,17 @@ class Motor {
 
 
     //functions
-    //setters and getters
-    void setDir(bool dir); //sets direction of motor
-    //void setPWM(float pwm); //sets pwm of motor
-    bool getDir(); //gets direction of motor
-    float getPWM(); //gets pwm of motor
+
 
     //ISR
     void encISR(); //encoder interrupt service routine
 
     //private functions
+    void setPWM(float pwm); //sets pwm of motor
     void setDriveType(bool driveType); //sets drive type of motor
-    void calcVel(); //calculates velocity of motor
-    void calcPos(); //calculates position of motor
-    void setPwm(float pwm); //sets pwm of motor (private
-    int pid(float target, float error); //pid controller (private
+    void calcVel();
+    float PID(); //PID control
+
   };
 
 #endif

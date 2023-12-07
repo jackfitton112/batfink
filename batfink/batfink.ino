@@ -16,8 +16,8 @@
 //#include "motors.h"
 //#include "drive.h"
 
-Motor leftMotor(MBED_MOTOR_PWMA, MBED_MOTOR_DIRA, MBED_MOTOR_ENCA, CCW);
-Motor rightMotor(MBED_MOTOR_PWMB, MBED_MOTOR_DIRB, MBED_MOTOR_ENCB, CW);
+Motor rightMotor(MBED_MOTOR_PWMA, MBED_MOTOR_DIRA, MBED_MOTOR_ENCA, CW);
+Motor leftMotor(MBED_MOTOR_PWMB, MBED_MOTOR_DIRB, MBED_MOTOR_ENCB, CCW);
 
 
 void setup(){
@@ -31,6 +31,11 @@ void setup(){
 
     Serial.begin(9600);
 
+    //set motor pwm
+    //leftMotor.setPWM(0.5);
+    rightMotor.setDir(CW);
+  
+
     //set motortarget velocity in wheel rev/min
     leftMotor.setTargetVel(10);
     rightMotor.setTargetVel(10);
@@ -43,9 +48,20 @@ void setup(){
 
 void loop() {
 
-    //print motor velocity
-    Serial.print("Motor Velocity: ");
-    Serial.println(leftMotor.getVel());
+    //print motor velocity, target velocity, error and pwm to serial for left motor
+    Serial.print("Left Motor: ");
+    Serial.print(leftMotor.getVel());
+    Serial.print(", ");
+    Serial.print(leftMotor.getTargetVel());
+    Serial.print(", ");
+    Serial.print(leftMotor.PIDerror);
+    Serial.print(", ");
+    Serial.println(leftMotor.PIDpwm);
+
+
+
+
+
 
     //non blocking delay
     rtos::ThisThread::sleep_for(100);

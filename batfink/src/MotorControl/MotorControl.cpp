@@ -50,91 +50,101 @@ void Motor::setup() {
         //initialise ticker
         velTicker.attach(mbed::callback(this, &Motor::calcVel), VEL_TICKER_PERIOD); //attach ticker to calcVel function, 0.1s period
 }
+
 //setters and getters
-void Motor::setDir(bool dir){
+
+//setters
+void Motor::setTargetPos(int pos) {
+    TargetPos = pos;
+    driveType = POS;
+}
+
+void Motor::setTargetVel(float vel) {
+    TargetVel = vel;
+    driveType = VEL;
+}
+
+void Motor::setDir(bool dir) {
     this->dir = dir;
     this->dirPin.write(dir);
 }
 
-void Motor::setPWM(float pwm){
-    this->pwmPin.write(pwm);
+//getters
+
+float Motor::getVel() {
+    return Velocity;
 }
 
-bool Motor::getDir(){
-    return this->dir;
+int Motor::getPos() {
+    return Position;
 }
 
-float Motor::getPWM(){
-    return this->pwmPin.read();
+float Motor::getTargetVel() {
+    return TargetVel;
 }
 
-//ISR
-void Motor::encISR(){
-    //increment encoder count
-    if(this->dir == CW){
-        this->encCount++;
-    }
-    else{
-        this->encCount--;
-    }
+int Motor::getTargetPos() {
+    return TargetPos;
+}
+
+bool Motor::getDir() {
+    return dir;
 }
 
 //private functions
-void Motor::setDriveType(bool driveType){
+
+void Motor::calcVel() {
+    //calculate velocity
+    Velocity = (encCount - encCountPrev) * 10 * 60 / 64; //calculate velocity in rev/min
+    encCountPrev = encCount; //set previous encoder count to current encoder count
+    if (driveType == VEL) {
+        PID();
+        setPWM(PIDpwm);
+    }
+
+}
+
+void Motor::encISR() {
+    //encoder ISR
+    if (dir == fwd_dir) {
+        encCount++;
+    } else {
+        encCount--;
+    }
+}
+
+void Motor::setPWM(float pwm) {
+    //set pwm of motor
+    if (pwm > 1) {
+        pwm = 1;
+    } else if (pwm < -1) {
+        pwm = -1;
+    }
+    //TODO: IF THE PWM IS LESS THAN 0, THE MOTOR DIRECTION NEEDS TO CHANGE 
+    this->pwmPin.write(fabs(pwm));
+}
+
+void Motor::setDriveType(bool driveType) {
+    //set drive type of motor
     this->driveType = driveType;
 }
 
-void Motor::calcVel(){
-    float encps = (this->encCount - this->encCountPrev) / VEL_TICKER_PERIOD;  //This provides encoder counts per second
-    this->Velocity = ((encps / ENC_CPR) * 60) * 2; //calculate velocity in rev/min
-    this->encCountPrev = this->encCount; //set previous encoder count to current encoder count
+float Motor::PID() {
+    //PID control
+    error = TargetVel - Velocity; //calculate error
+    integral += error * VEL_TICKER_PERIOD; //calculate integral
+    derivative = (error - errorPrev) / VEL_TICKER_PERIOD; //calculate derivative
+    errorPrev = error; //set previous error to current error
+    PIDerror = error; //set PIDerror to current error
 
-    //PID (constant velocity)
-    if(this->driveType == VEL){
-        this->error = this->TargetVel - this->Velocity; //calculate error
-        this->integral += this->error * VEL_TICKER_PERIOD; //calculate integral
-        this->derivative = (this->error - this->errorPrev) / VEL_TICKER_PERIOD; //calculate derivative
-        this->errorPrev = this->error; //set previous error to current error
-
-        float pwm = (KP * this->error) + (KI * this->integral) + (KD * this->derivative); //calculate pwm
-
-
-        this->setPWM(pwm); //set pwm
+    //return a pwm value between -1 and 1
+    if (dir == fwd_dir) {
+        PIDpwm = (KP * error) + (KI * integral) + (KD * derivative);
+    } else {
+        PIDpwm = -((KP * error) + (KI * integral) + (KD * derivative));
     }
 
 }
 
-void Motor::calcPos(){
-    //calculate position
-    this->Position = this->encCount / ENC_CPR; //calculate position in rev
-}
-
-void Motor::setPwm(float pwm){
-    //set pwm
-
-    //if pwm is negative, flip direction
-    if (pwm < 0){
-        this->dirPin.write(!this->fwd_dir);
-        pwm = -pwm;
-    }
-    else{
-        this->dirPin.write(this->fwd_dir);
-    }
-
-    this->pwmPin.write(pwm);
-}
-
-int Motor::getPos(){
-    return this->Position;
-}
-
-float Motor::getVel(){
-    return this->Velocity;
-}
 
 
-void Motor::setTargetVel(float vel){
-    //This is in rev/min but needs converting to encoder counts per second
-    float encps = (vel / 60) * ENC_CPR; //convert to encoder counts per second
-    this->TargetVel = encps; //set target velocity
-}
