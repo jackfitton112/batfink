@@ -1,69 +1,62 @@
 /**
  * @file batfink.ino
  * @author Jack Fitton (jf1595@york.ac.uk)
- * @brief Main file for batfink project
+ * @brief Main file for the batfink robot
  * @version 0.1
- * @date 28-11-2023
+ * @date 24-12-2023
  * 
  * @copyright Copyright (c) 2023
  * 
+  ___   _ _____ ___ ___ _  _ _  ___ 
+ | _ ) /_\_   _| __|_ _| \| | |/ / |
+ | _ \/ _ \| | | _| | || .` | ' <|_|
+ |___/_/ \_\_| |_| |___|_|\_|_|\_(_)
+
+ Batfink Super sonic sonar radar robot
+
+ Stage 3 Robotic Deisgn and Contstruction
+ University of York
+ Jack Fitton
+ 2023/24
+
+*/                                  
+
+
+#include "batfink.h"
+
+
+/**
+ * @brief Initializes the setup of the program.
+ * 
+ * This function is called once at the beginning of the program.
+ * It starts the serial communication, initializes the sensors,
+ * and prepares the program for further initialization of motors,
+ * maze, and communication.
  */
-#include "mbed.h"
-//#include "src/batfink/batfink.h"
-#include "src/batfink/pins.h"
-#include "src/MotorControl/MotorControl.h"
-#include "src/usonic/usonic.h"
-//#include "motors.h"
-//#include "drive.h"
-
-Motor rightMotor(MBED_MOTOR_PWMA, MBED_MOTOR_DIRA, MBED_MOTOR_ENCA, CW);
-Motor leftMotor(MBED_MOTOR_PWMB, MBED_MOTOR_DIRB, MBED_MOTOR_ENCB, CCW);
-
-
 void setup(){
+    //start serial comms
+    Serial.begin(115200);
 
-    //setup motors
-    //Motor_setup();
-    leftMotor.setup();
-    rightMotor.setup();
-    //setup usonic
-    //Usonic_setup();
+    //initialise sensors
+    sensorInit();
 
-    Serial.begin(9600);
+    //initialise motors
+    //motorInit(); TODO
 
-    //set motor pwm
-    //leftMotor.setPWM(0.5);
-    rightMotor.setDir(CCW);
-    leftMotor.setDir(CW);
-  
+    //initialise maze
+    //mazeInit(); TODO
 
-    //set motortarget velocity in wheel rev/min
-    leftMotor.setTargetVel(10);
-    rightMotor.setTargetVel(10);
+    //initialise comms
+    //commsInit(); TODO
+
 
 }
 
 
 
+//main loop, will have logic in here soon TM
+void loop(){
 
+    Thread::sleep_for(1000);
 
-void loop() {
-
-    //print motor velocity, target velocity, error and pwm to serial for left motor
-    Serial.print("Left Motor: ");
-    Serial.print(leftMotor.getVel());
-    Serial.print(", ");
-    Serial.print(leftMotor.getTargetVel());
-    Serial.print(", ");
-    Serial.print(leftMotor.PIDerror);
-    Serial.print(", ");
-    Serial.println(leftMotor.PIDpwm);
-
-
-
-
-
-
-    //non blocking delay
-    rtos::ThisThread::sleep_for(100);
 }
