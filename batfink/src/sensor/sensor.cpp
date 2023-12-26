@@ -87,7 +87,12 @@ void Sensor::read(){
     _timer.stop();
 
     //calculate distance
-    _distance = _timer.read_us() / 58; //58 is the conversion factor from time to distance
+    int read_dist = _timer.read_us() / 58; //58 is the conversion factor from time to distance
+    
+    //if difference is greater than 10cm, ignore as it is likely an error
+    if (abs(read_dist - _distance) < 10){
+        _distance = read_dist;
+    } 
 
     //reset timer
     _timer.reset();

@@ -38,16 +38,17 @@ void setup(){
     Serial.begin(115200);
 
     //initialise sensors
-    sensorInit();
+   //sensorInit();
 
     //initialise motors
-    //motorInit(); TODO
+    motorInit();
 
     //initialise maze
     //mazeInit(); TODO
 
     //initialise comms
     //commsInit(); TODO
+
 
 
 }
@@ -57,6 +58,6 @@ void setup(){
 //main loop, will have logic in here soon TM
 void loop(){
 
-    Thread::sleep_for(1000);
+    ThisThread::sleep_for(1000);
 
 }

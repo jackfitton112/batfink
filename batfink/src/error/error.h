@@ -28,6 +28,15 @@ NOTE: Error codes are in the format:
 #define ERR_DRIVE_GENERAL 1
 #define ERR_DRIVE_INIT_FAIL 2
 #define ERR_DRIVE_MOTOR_FAIL 3
+#define ERR_DRIVE_WRNG_MODE 4
+#define ERR_DRIVE_PWM_FAIL 5
+#define ERR_DRIVE_VELOCITY_FAIL 6
+#define ERR_DRIVE_POSITION_FAIL 7
+#define ERR_DRIVE_PID_FAIL 8
+#define ERR_DRIVE_ENCODER_FAIL 9
+#define ERR_DRIVE_ENCODER_INIT_FAIL 10
+#define ERR_DRIVE_ENCODER_RESET_FAIL 11
+#define ERR_DRIVE_ENCODER_READ_FAIL 12
 
 
 // BLE Connection and Data Transmission Errors
