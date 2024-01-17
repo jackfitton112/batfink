@@ -1,27 +1,22 @@
 /**
- * @file batfinkRobot.h
+ * @file batfink.h
  * @author Jack Fitton (jf1595@york.ac.uk)
- * @brief Header file for batfinkRobot.ino
+ * @brief Header file for batfink.ino
  * @version 0.1
- * @date 24-12-2023
+ * @date 16-01-2024
  * 
- * @copyright Copyright (c) 2023
+ * @copyright Copyright (c) 2024
  * 
  */
 
 #ifndef BATFINK_H
 #define BATFINK_H
 
-#include "src/motor/motor.h"
-#include "src/sensor/sensor.h"
-#include "src/comms/comms.h"
-#include "src/maze/maze.h"
-#include "src/error/error.h"
+#include "motor.h"
+
 
 #include <mbed/mbed.h>
-
-using namespace mbed;
-using namespace rtos;
+#include <Arduino.h>
 
 
 

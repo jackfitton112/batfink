@@ -3,3 +3,4 @@ batfink/.vscode/**
 build/**
 .build/**
 old.zip
+temp/**

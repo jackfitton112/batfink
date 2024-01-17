@@ -3,61 +3,75 @@
  * @author Jack Fitton (jf1595@york.ac.uk)
  * @brief Main file for the batfink robot
  * @version 0.1
- * @date 24-12-2023
+ * @date 16-01-2024
  * 
- * @copyright Copyright (c) 2023
+ * @copyright Copyright (c) 2024
  * 
-  ___   _ _____ ___ ___ _  _ _  ___ 
- | _ ) /_\_   _| __|_ _| \| | |/ / |
- | _ \/ _ \| | | _| | || .` | ' <|_|
- |___/_/ \_\_| |_| |___|_|\_|_|\_(_)
-
- Batfink Super sonic sonar radar robot
-
- Stage 3 Robotic Deisgn and Contstruction
- University of York
- Jack Fitton
- 2023/24
-
-*/                                  
-
+ */
 
 #include "batfink.h"
 
 
-/**
- * @brief Initializes the setup of the program.
- * 
- * This function is called once at the beginning of the program.
- * It starts the serial communication, initializes the sensors,
- * and prepares the program for further initialization of motors,
- * maze, and communication.
- */
+
 void setup(){
-    //start serial comms
+
+    //wait for serial connection
     Serial.begin(115200);
-
-    //initialise sensors
-   //sensorInit();
-
-    //initialise motors
-    motorInit();
-
-    //initialise maze
-    //mazeInit(); TODO
-
-    //initialise comms
-    //commsInit(); TODO
+    //while(!Serial);
 
 
+    //setup motors
+    //motorInit();
+
+
+    leftMotor.setup();
+    rightMotor.setup();
+
+
+    //set velocity
+    leftMotor.setVelocity(10);
+    rightMotor.setVelocity(10);
+  
 
 }
-
-
-
-//main loop, will have logic in here soon TM
 void loop(){
 
-    ThisThread::sleep_for(1000);
+    
+    //print target and velocity
+    Serial.print("Target velocity: ");
+    Serial.println(leftMotor._TargetVelocity);
+    Serial.print("Current velocity: ");
+    Serial.println(leftMotor._currentVelocity);
+
+    //print PID output
+    Serial.print("PID output: ");
+    Serial.println(leftMotor._PIDoutput);
+
+    //print pid values
+    Serial.print("PID error: ");
+    Serial.println(leftMotor._PIDerror);
+    Serial.print("PID integral: ");
+    Serial.println(leftMotor._PIDintegral);
+    Serial.print("PID derivative: ");
+    Serial.println(leftMotor._PIDderivative);
+
+    //print encoder count values
+    Serial.print("Encoder count: ");
+    Serial.println(leftMotor._encoderCount);
+    Serial.print("Last encoder count: ");
+    Serial.println(leftMotor._lastEncoderCount);
+    Serial.print("Encoder diff: ");
+    Serial.println(leftMotor._encoderDiff);
+
+    //print movement mode
+    Serial.print("Movement mode: ");
+    Serial.println(leftMotor._movementMode);
+
+
+
+
+    rtos::ThisThread::sleep_for(500);
+
+
 
 }
