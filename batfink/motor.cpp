@@ -45,7 +45,7 @@ Motor::Motor(PinName pwmPin, PinName directionPin, PinName encoderPin, forwardDi
     _PIDintegral = 0;
     _PIDderivative = 0;
     _PIDoutput = 0;
-    _movementMode = STOP;
+    _movementMode = STP;
 
 }
 
@@ -76,8 +76,11 @@ int Motor::setup(){
 }
 
 int Motor::stop() {
-    _movementMode = STOP;
+    _movementMode = STP;
     _setPWM(0);
+    if (stoppedCallback) {
+        stoppedCallback();
+    }
     return OK;
 }
 
@@ -100,6 +103,11 @@ int Motor::getCurrentVelocity() {
 int Motor::getCurrentPosition() {
     return _encoderCount;
 }
+
+void Motor::onStopped(const MotorCallback& callback) {
+        stoppedCallback = callback;
+}
+
 
 
 
@@ -127,6 +135,8 @@ void Motor::_encoderISR() {
  * @brief PID control for the motor.
  * 
  * @note This function is called every PID_TICKER_PERIOD seconds.
+ * if the motor is in STP mode, the PID output is set to 0.
+ * if the motor is in CONSTANT_VELOCITY mode, the PID output is set to the output of the PID controller.
  */
 void Motor::_PID(){
 
@@ -134,32 +144,131 @@ void Motor::_PID(){
 
     switch (mode)
     {
-        case STOP:
+        case STP:
             _PIDoutput = 0;
             break;
         case CONSTANT_VELOCITY:
+
+            //if target position is set, and the motor is within 1/2 a rotation of the target position, switch to EXACT_POSITION mode
+            if (_TargetPosition != 0 && abs(_TargetPosition - _encoderCount) < ENC_CPR / 2) {
+                //reset integral and derivative as not to cause a spike in output
+                _PIDintegral = 0;
+                _PIDderivative = 0;
+
+                //set last error to current target 0encoder count
+                _PIDlastError = _TargetPosition - _encoderCount;
+                
+                
+                _movementMode = EXACT_POSITION;
+            }
+
+
+            //set PID values for constant velocity, cap output at +/- 0.5
             _PIDerror = _TargetVelocity - _currentVelocity;
             _PIDintegral += _PIDerror * PID_TICKER_PERIOD;
             _PIDderivative = (_PIDerror - _PIDlastError) / PID_TICKER_PERIOD;
-            _PIDoutput = (KP * _PIDerror) + (KI * _PIDintegral) + (KD * _PIDderivative);
+            _PIDoutput = _PIDerror * VELKP + _PIDintegral * VELKI + _PIDderivative * VELKD;
+
+            //cap output at +/- 0.5
+            _PIDoutput = fmax(fmin(_PIDoutput, 0.7), -0.7);
+
+            //update last error
             _PIDlastError = _PIDerror;
+            
             break;
+
         case EXACT_POSITION:
 
+            //if target is more than 2 rotations of the wheel away, switch to CONSTANT_VELOCITY mode
+            if (abs(_TargetPosition - _encoderCount) > ENC_CPR * 2) {
+                //reset integral and derivative as not to cause a spike in output
+                _PIDintegral = 0;
+                _PIDderivative = 0;
+
+                setVelocity(10);
+
+                //set last error to current target 0encoder count
+                _PIDlastError = _TargetVelocity - _currentVelocity;
+                _movementMode = CONSTANT_VELOCITY;
+            }
+
+            //set PID values for exact position control, cap output at +/- 0.3
             _PIDerror = _TargetPosition - _encoderCount;
             _PIDintegral += _PIDerror * PID_TICKER_PERIOD;
             _PIDderivative = (_PIDerror - _PIDlastError) / PID_TICKER_PERIOD;
-            _PIDoutput = (KP * _PIDerror) + (KI * _PIDintegral) + (KD * _PIDderivative);
+            _PIDoutput = _PIDerror * POSKP + _PIDintegral * POSKI + _PIDderivative * POSKD;
+
+            //cap output at +/- 0.3 if the motor is within 1/2 a rotation of the target position
+            if (abs(_TargetPosition - _encoderCount) < ENC_CPR / 2) {
+                _PIDoutput = fmax(fmin(_PIDoutput, 0.2), -0.2);
+            }
+            //if its within 1/4 of a rotation, cap output at +/- 0.1
+            else if (abs(_TargetPosition - _encoderCount) < ENC_CPR / 4) {
+                //if error == previous error (not moving), increase torque compensation by 0.01
+                if (_PIDerror == _PIDlastError) {
+                  _torqueCompensation += 0.01;
+                }
+
+                _PIDoutput = fmax(fmin(_PIDoutput, _torqueCompensation), -_torqueCompensation);
+            }
+
+            else {
+                _PIDoutput = fmax(fmin(_PIDoutput, 0.3), -0.3);
+                }
+
+            //update last error
             _PIDlastError = _PIDerror;
+
+
+
             break;
+
+
+        case TURNING:
+
+            //only used when the robot is turning, as it turns on the spot there is never a velocity demand#
+
+            //set PID values for turning, cap output at +/- 0.5
+            _PIDerror = _TargetPosition - _encoderCount;
+            _PIDintegral += _PIDerror * PID_TICKER_PERIOD;
+            _PIDderivative = (_PIDerror - _PIDlastError) / PID_TICKER_PERIOD;
+            _PIDoutput = _PIDerror * TURNINGKP + _PIDintegral * TURNINGKI + _PIDderivative * TURNINGKD;
+            if (abs(_TargetPosition - _encoderCount) < ENC_CPR / 2) {
+                _PIDoutput = fmax(fmin(_PIDoutput, 0.2), -0.2);
+            }
+            else if (abs(_TargetPosition - _encoderCount) < ENC_CPR / 2) {
+                //if error == previous error (not moving), increase torque compensation by 0.01
+                if (_PIDerror == _PIDlastError) {
+                  _torqueCompensation += 0.01;
+                }
+
+                _PIDoutput = fmax(fmin(_PIDoutput, _torqueCompensation), -_torqueCompensation);
+            }
+
+            else {
+                _PIDoutput = fmax(fmin(_PIDoutput, 0.3), -0.3);
+                }
+
+
+
+            //update last error
+            _PIDlastError = _PIDerror;
+
+            break;
+
 
         default:
             break;
+
     }
 
 
-    //clamp pid output to +/- 0.4
-    _PIDoutput = fmax(fmin(_PIDoutput, 0.7), -0.7);
+    //if PID error is less than 10 encoder counts, switch to STP mode
+    if (abs(_TargetPosition - _encoderCount) < 30 && _TargetPosition != 0) {
+        _movementMode = STP;
+        _PIDoutput = 0;
+        stop();
+    }
 
     //set pwm
     _setPWM(_PIDoutput);
@@ -196,36 +305,16 @@ void Motor::_CalcVelocity() {
  */
 int Motor::_setPWM(double pwmVal) {
 
-    if (_movementMode == STOP) {
-        pwmVal = 0;
-        _pwmPin.write(STOP); //Actually set the PWM, spent 3 hours debugging this
-        return OK;
-    }
-
-    //check pwm value is in range
-    if (pwmVal > 1) {
-        pwmVal = 1;
-    }
-    else if (pwmVal < -1) {
-        pwmVal = -1;
-    }
-
-    //if pwm value is negative, set direction pin to backwards
-    if (pwmVal < 0) {
-        _directionPin.write(!_fwdDir);
+    //the convention is that forwards is positive and backwards is negative
+    if (pwmVal > 0) {
+        _setDirection(FWD);
     }
     else {
-        _directionPin.write(_fwdDir);
+        _setDirection(BKWD);
     }
 
-    _pwmPin.write(fabs(pwmVal));
-
-    //check pwm value was wrote correctly
-    if (_pwmPin.read() != pwmVal) {
-        return ERR_DRIVE_PWM_FAIL;
-    } else {
-        return OK;
-    }
+    //set pwm
+    _pwmPin.write(abs(pwmVal));
 
 
 }
@@ -233,7 +322,7 @@ int Motor::_setPWM(double pwmVal) {
 
 
 int Motor::_setDirection(driveDirection dir) {
-    if (dir == FORWARD) {
+    if (dir == FWD) {
         _directionPin.write(_fwdDir);
     }
     else {
@@ -266,7 +355,4 @@ int Motor::_setTargetPosition(int position) {
 
 
 
-int motorInit() {
-    rightMotor.setup();
-    leftMotor.setup();
-}
+

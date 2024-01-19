@@ -16,6 +16,7 @@
 #define MOTOR_H
 
 #include <mbed/mbed.h>
+#include <functional>
 
 #include "error.h"
 
@@ -32,10 +33,10 @@ using namespace rtos;
 #define MBED_LEFT_MOTOR_PWM P1_2
 
 //3576 / 2
-#define ENC_CPR 1746 //encoder counts per revolution
-#define WHEEL_DIAMETER 47 //wheel diameter in mm
-#define WHEEL_CIRCUMFERENCE 147 //wheel circumference in mm
-#define WHEEL_BASE 150 //wheel base in mm
+#define ENC_CPR 1746.0f //encoder counts per revolution
+#define WHEEL_DIAMETER 47.0f //wheel diameter in mm
+#define WHEEL_CIRCUMFERENCE 147.0f //wheel circumference in mm
+#define WHEEL_BASE 150.0f //wheel base in mm
 
 #define VEL_TICKER_PERIOD 0.1 //ticker period for velocity calculation
 #define PID_TICKER_PERIOD 0.1 //ticker period for PID calculation
@@ -43,9 +44,18 @@ using namespace rtos;
 #define PWM_PERIOD_US 20 //pwm period in microseconds
 
 //pid constants
-#define KP 0.001
-#define KI 0.1
-#define KD 0
+#define VELKP 0.01
+#define VELKI 0.02
+#define VELKD 0.00001
+
+#define POSKP 0.025
+#define POSKI 0.0002
+#define POSKD 0.00001
+
+#define TURNINGKP 0.045
+#define TURNINGKI 0.0004
+#define TURNINGKD 0.00001
+
 
 //called in the constructor, used as only 1 of the encoder pins is connected therefore dir is required
 enum forwardDirection {
@@ -54,14 +64,15 @@ enum forwardDirection {
 };
 
 enum driveDirection {
-    FORWARD = true,
-    BACKWARD = false
+    FWD = true,
+    BKWD = false
 };
 
 enum RobotMovementMode {
-    STOP,
+    STP,
     CONSTANT_VELOCITY,
-    EXACT_POSITION
+    EXACT_POSITION,
+    TURNING
 
 };
 
@@ -79,6 +90,8 @@ class Motor {
         int getCurrentVelocity();
         int getCurrentPosition();
 
+        using MotorCallback = std::function<void()>;
+        void onStopped(const MotorCallback& callback);
 
 
 
@@ -94,6 +107,7 @@ class Motor {
         int _setTargetVelocity(float velocity);
         int _setTargetPosition(int position);
 
+
        
         RobotMovementMode _movementMode; //the current movement mode of the motor
 
@@ -108,13 +122,15 @@ class Motor {
 
         Ticker _velocityTicker;
         Ticker _PIDTicker;
+        MotorCallback stoppedCallback;
+
 
         volatile float _PIDerror; //the current error of the PID controller
         volatile float _PIDlastError; //the error of the PID controller from the last tick
         volatile float _PIDintegral; //the integral of the PID controller
         volatile float _PIDderivative; //the derivative of the PID controller
         volatile float _PIDoutput; //the output of the PID controller
-
+        volatile float _torqueCompensation; //the torque compensation value for the motor
 
 
         int _ERR = OK; //the error code for the motor
@@ -130,56 +146,7 @@ class Motor {
 
 extern Motor rightMotor;
 extern Motor leftMotor;
-extern int motorInit();
+
 
 
 #endif //MOTOR_H
-
-/*
-void Motor::tickVelocity() {
-  //calculate encoder difference
-  int diff = encoderCount-encoderCountLast;
-  //update encoder difference
-  encoderCountLast = encoderCount;
-  //calculate speed
-  velocity = (float)diff/VELOCITY_MEASURE_SPEED;
-  //calculate control signal, for VELOCITY and or POSITION
-  switch (target.demandType) {
-    case NONE:
-      // do not do PID things.
-      settled = true;
-      rawset(0, 0);
-      previous_error = 0;
-      error = 0;
-      integral_error = 0;
-      break;
-    case VELOCITY:
-      settled = false;
-      error =  velocity - target.value;
-      derivative_error = (float)(error-previous_error)/VELOCITY_MEASURE_SPEED;
-      integral_error = integral_error + error * VELOCITY_MEASURE_SPEED;
-      signal = velocityConfig.kp*error + velocityConfig.kd*derivative_error + velocityConfig.ki*integral_error;
-      rawset(signal, velocityConfig.MIZeroOffset);
-      previous_error = error;
-      break;
-    case POSITION:
-    case POSITION_RELATIVE:
-      // motor hasn't settled yet
-      settled = false;
-      error = target.value - encoderCount;
-      derivative_error = (float)(error-previous_error)/VELOCITY_MEASURE_SPEED;
-      integral_error = integral_error + error * VELOCITY_MEASURE_SPEED;
-      signal = positionConfig.kp*error + positionConfig.kd*derivative_error + positionConfig.ki*integral_error;
-      // If motor has settled
-      if ((error*error+velocity*velocity)<=positionConfig.deadZone*positionConfig.deadZone) {
-        target.demandType=NONE;
-        settled = true;
-        return;
-      }
-      // Motor hasn't settled, transmit signal to wheels
-      rawset(-signal, positionConfig.MIZeroOffset);
-      previous_error = error;
-      break;
-  }
-}
-*/

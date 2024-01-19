@@ -11,67 +11,183 @@
 
 #include "batfink.h"
 
+using namespace mbed;
+using namespace rtos;
+
+Thread robotDriveThread(osPriorityNormal, 4096);
+
+
+
 
 
 void setup(){
 
     //wait for serial connection
     Serial.begin(115200);
-    //while(!Serial);
-
-
-    //setup motors
-    //motorInit();
-
-
-    leftMotor.setup();
-    rightMotor.setup();
-
-
-    //set velocity
-    leftMotor.setVelocity(10);
-    rightMotor.setVelocity(10);
-  
-
-}
-void loop(){
+    ThisThread::sleep_for(1000);
 
     
-    //print target and velocity
-    Serial.print("Target velocity: ");
-    Serial.println(leftMotor._TargetVelocity);
-    Serial.print("Current velocity: ");
-    Serial.println(leftMotor._currentVelocity);
 
-    //print PID output
-    Serial.print("PID output: ");
-    Serial.println(leftMotor._PIDoutput);
 
-    //print pid values
-    Serial.print("PID error: ");
-    Serial.println(leftMotor._PIDerror);
-    Serial.print("PID integral: ");
-    Serial.println(leftMotor._PIDintegral);
-    Serial.print("PID derivative: ");
-    Serial.println(leftMotor._PIDderivative);
+    Serial.println("Starting up...");
+    batfinkRobot.setup();
+    Serial.println("Setup complete");
 
-    //print encoder count values
-    Serial.print("Encoder count: ");
-    Serial.println(leftMotor._encoderCount);
-    Serial.print("Last encoder count: ");
-    Serial.println(leftMotor._lastEncoderCount);
-    Serial.print("Encoder diff: ");
-    Serial.println(leftMotor._encoderDiff);
 
-    //print movement mode
-    Serial.print("Movement mode: ");
-    Serial.println(leftMotor._movementMode);
+    robotDriveThread.start(drive);
 
 
 
+}
 
-    rtos::ThisThread::sleep_for(500);
+int messureSensorDistance(sensorType sensor){
 
+    int distance = 0;
+
+    //take 3 readings
+    for(int i = 0; i < 3; i++){
+
+        switch (sensor)
+        {
+        case FRONTSENSOR:
+            distance += batfinkRobot._frontSensorDistancemm;
+            break;
+        case LEFTSENSOR:
+            distance += batfinkRobot._leftSensorDistancemm;
+            break;
+        case RIGHTSENSOR:
+            distance += batfinkRobot._rightSensorDistancemm;
+            break;
+
+        default:
+            break;
+        }
+
+        ThisThread::sleep_for(300);
+    }
+
+    return distance / 3;
+
+}
+
+
+void drive(){
+
+    bool start = true;
+
+    while(1){
+
+        int front = messureSensorDistance(FRONTSENSOR);
+        int left = messureSensorDistance(LEFTSENSOR);
+        int right = messureSensorDistance(RIGHTSENSOR);
+
+        //print sensor values
+        Serial.print("Front: ");
+        Serial.print(front);
+        Serial.print(" Left: ");
+        Serial.print(left);
+        Serial.print(" Right: ");
+        Serial.println(right);
+
+        if (start){
+            //drive forward
+            batfinkRobot.driveForward(100);
+            start = false;
+        }
+
+        //if front sensor is less than 15cm
+        else if (front < 150){
+            //if left sensor is less than right sensor
+            if (left < right){
+                //turn left
+                Serial.println("Turning Right 90");
+                batfinkRobot.turnRight(90);
+            } else {
+                //turn right
+                Serial.println("Turning Left 90");
+                batfinkRobot.turnLeft(90);
+            }
+        }
+
+        else {
+            //drive forward
+            //print drive distance
+            int dist = (front - 50)/2;
+            Serial.print("Driving forward: ");
+            Serial.println(dist);
+    
+            batfinkRobot.driveForward(dist);
+        }
+
+    }
+
+}
+
+
+
+void loop(){
+
+    /*
+    //print robot x and y position
+    Serial.print("X: ");
+    Serial.print(batfinkRobot._XPOS);
+    Serial.print(" Y: ");
+    Serial.print(batfinkRobot._YPOS);
+    Serial.print(" Theta: ");
+    Serial.print(batfinkRobot._angleDeg);
+    Serial.print(" Angle Err: ");
+    Serial.print(batfinkRobot._AngleERR);
+    Serial.print(" Direction: ");
+    Serial.println(batfinkRobot._direction);
+    //x y error
+    Serial.print("X Error: ");
+    Serial.print(batfinkRobot._XPOS_ERR);
+    Serial.print(" Y Error: ");
+    Serial.println(batfinkRobot._YPOS_ERR);
+    //TARGETS
+    Serial.print("X Target: ");
+    Serial.print(batfinkRobot._XPOS_TARGET);
+    Serial.print(" Y Target: ");
+    Serial.println(batfinkRobot._YPOS_TARGET);
+    //left and right motors theta and target theta
+    */
+
+    /*
+    //print left and right encoder counts and targets
+    Serial.print("Left Encoder Count: ");
+    Serial.print(batfinkRobot._leftMotor._encoderCount);
+    Serial.print(" Target: ");
+    Serial.print(batfinkRobot._leftMotor._TargetPosition);
+    Serial.print(" Err: ");
+    Serial.print(batfinkRobot._leftMotor._PIDerror);
+    Serial.print(" Right Encoder Count: ");
+    Serial.print(batfinkRobot._rightMotor._encoderCount);
+    Serial.print(" Target: ");
+    Serial.print(batfinkRobot._rightMotor._TargetPosition);
+    Serial.print(" Err: ");
+    Serial.println(batfinkRobot._rightMotor._PIDerror);
+
+    //print left and right motor modes
+    Serial.print("Left Motor Mode: ");
+    Serial.print(batfinkRobot._leftMotor._movementMode);
+    Serial.print(" Right Motor Mode: ");
+    Serial.println(batfinkRobot._rightMotor._movementMode);
+
+    //print left and right motor PID values
+    Serial.print("Left Motor PID: ");
+    Serial.print(batfinkRobot._leftMotor._PIDoutput);
+    Serial.print(" Right Motor PID: ");
+    Serial.println(batfinkRobot._rightMotor._PIDoutput);
+
+    */
+
+
+
+
+    //crashing here
+  
+    //wait for 1 second 
+    ThisThread::sleep_for(500);
 
 
 }

@@ -13,10 +13,14 @@
 #define BATFINK_H
 
 #include "motor.h"
+#include "sensor.h"
+#include "error.h"
+#include "robot.h"
 
 
 #include <mbed/mbed.h>
 #include <Arduino.h>
+
 
 
 
