@@ -16,6 +16,7 @@
 #include "sensor.h"
 #include "error.h"
 #include "robot.h"
+#include "mapping.h"
 
 
 #include <mbed/mbed.h>

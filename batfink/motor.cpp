@@ -264,7 +264,7 @@ void Motor::_PID(){
 
 
     //if PID error is less than 10 encoder counts, switch to STP mode
-    if (abs(_TargetPosition - _encoderCount) < 30 && _TargetPosition != 0) {
+    if (abs(_TargetPosition - _encoderCount) < 45 && _TargetPosition != 0) {
         _movementMode = STP;
         _PIDoutput = 0;
         stop();

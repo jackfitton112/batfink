@@ -30,11 +30,20 @@ void setup(){
 
 
     Serial.println("Starting up...");
-    batfinkRobot.setup();
+    int err;
+
+    err = batfinkRobot.setup();
+
+    if (err != 0){
+        Serial.print("Error setting up batfink: ");
+        Serial.println(err);
+    }
+
+    initMaze();
+
     Serial.println("Setup complete");
 
-
-    robotDriveThread.start(drive);
+   robotDriveThread.start(drive);
 
 
 
@@ -123,6 +132,27 @@ void drive(){
 
 }
 
+void printMaze() {
+    Serial.println("========================================");
+    for (auto &row : maze) {
+        for (auto &cell : row) {
+            switch (cell) {
+                case UNKNOWN:
+                    Serial.print("?");
+                    break;
+                case EMPTY:
+                    Serial.print(" ");
+                    break;
+                case WALL:
+                    Serial.print("X");
+                    break;
+            }
+        }
+        Serial.println();
+    }
+    Serial.println("========================================");
+}
+
 
 
 void loop(){
@@ -181,13 +211,15 @@ void loop(){
 
     */
 
+   printMaze();
+
 
 
 
     //crashing here
   
     //wait for 1 second 
-    ThisThread::sleep_for(500);
+    ThisThread::sleep_for(2000);
 
 
 }

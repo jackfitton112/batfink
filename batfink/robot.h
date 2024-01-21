@@ -23,7 +23,7 @@
 #define TRACK_WIDTH 150.0f //mm
 #define PI 3.14159265358979323846f
 #define XYT_UPDATE_INTERVAL 0.1 //s
-#define TURN_OFFSET 1.05f //5% error in turning
+#define TURN_OFFSET 1.00f //0% error in turning
 
 
 enum robotDriveDirection {
@@ -47,6 +47,7 @@ class Batfink {
         int turnLeft(int angle);
         int turnRight(int angle);
         int stop();
+        int move(int direction, int distance);
 
     //private:
 

@@ -131,6 +131,24 @@ int Batfink::stop(){
     return OK;
 }
 
+int Batfink::move(int direction, int distance){
+    switch(direction){
+        case 0:
+            return stop();
+        case 1:
+            return driveForward(distance);
+        case 2:
+            return driveBackward(distance);
+        case 3:
+            return turnLeft(distance);
+        case 4:
+            return turnRight(distance);
+        default:
+            return ERR_ROBOT_BLE_MOVE_FAIL;
+    }
+    return OK;
+}
+
 
 
 /**
