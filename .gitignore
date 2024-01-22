@@ -1,3 +1,8 @@
 .vscode/**
 batfink/.vscode/**
 build/**
+.build/**
+old1.zip
+temp/**
+temp
+.vscode/**

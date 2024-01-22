@@ -1,0 +1,31 @@
+<mxfile host="Electron" modified="2023-12-24T18:36:17.996Z" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/22.1.2 Chrome/114.0.5735.289 Electron/25.9.4 Safari/537.36" etag="Ym_-ghTlnkn3BVvLbdML" version="22.1.2" type="device">
+  <diagram name="Page-1" id="F4jApzVPX7Jvv23gAqRK">
+    <mxGraphModel dx="989" dy="590" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="ZJDckvpSUw9HOhXPX2ok-1" value="&lt;b&gt;Drive&lt;br&gt;&lt;/b&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;Contains:&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size: 9px;&quot;&gt;Motor Objects, PID, drive control, current pos and angle&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="240" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="ZJDckvpSUw9HOhXPX2ok-2" value="&lt;b&gt;Maze&lt;br&gt;&lt;/b&gt;&lt;font style=&quot;border-color: var(--border-color); font-size: 10px;&quot;&gt;Contains:&lt;/font&gt;&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;&lt;font size=&quot;1&quot;&gt;Maze init, maze fill, maze solve&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="200" y="240" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="ZJDckvpSUw9HOhXPX2ok-3" value="&lt;b&gt;Usonic&lt;br&gt;&lt;/b&gt;&lt;font style=&quot;border-color: var(--border-color); font-size: 10px;&quot;&gt;Contains:&lt;/font&gt;&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;&lt;font style=&quot;border-color: var(--border-color); font-size: 9px;&quot;&gt;Sensor objects, read distance,&amp;nbsp; usonic helpers&lt;/font&gt;&lt;b&gt;&lt;br&gt;&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="240" width="120" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="ZJDckvpSUw9HOhXPX2ok-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="ZJDckvpSUw9HOhXPX2ok-4" target="ZJDckvpSUw9HOhXPX2ok-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ZJDckvpSUw9HOhXPX2ok-11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="ZJDckvpSUw9HOhXPX2ok-4" target="ZJDckvpSUw9HOhXPX2ok-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ZJDckvpSUw9HOhXPX2ok-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="ZJDckvpSUw9HOhXPX2ok-4" target="ZJDckvpSUw9HOhXPX2ok-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ZJDckvpSUw9HOhXPX2ok-4" value="&lt;b&gt;Main&lt;br&gt;&lt;/b&gt;&lt;font style=&quot;border-color: var(--border-color); font-size: 10px;&quot;&gt;Contains:&lt;/font&gt;&lt;br style=&quot;border-color: var(--border-color);&quot;&gt;&lt;font style=&quot;border-color: var(--border-color); font-size: 9px;&quot;&gt;Main program&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="440" height="120" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
