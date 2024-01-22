@@ -1,4 +1,10 @@
-#BLE controller that uses simpleBLE yo get sensor readings and send commands to the robot
+# Title: Controller
+# Description: BLE controller for the robot (DEPRECATED AS BLE KEEPS CRASHING)
+# Author: Jack Fitton
+# Version: 1.0
+# Date: 21/01/2024
+# (c) Copyright 2024 Jack Fitton
+
 import asyncio
 import struct
 from bleak import BleakClient

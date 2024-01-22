@@ -33,10 +33,10 @@ using namespace rtos;
 #define MBED_LEFT_MOTOR_PWM P1_2
 
 //3576 / 2
-#define ENC_CPR 1746.0f //encoder counts per revolution
-#define WHEEL_DIAMETER 47.0f //wheel diameter in mm
-#define WHEEL_CIRCUMFERENCE 147.0f //wheel circumference in mm
-#define WHEEL_BASE 150.0f //wheel base in mm
+#define ENC_CPR 1788.0f //encoder counts per revolution
+#define WHEEL_DIAMETER 51.4f //wheel diameter in mm
+#define WHEEL_CIRCUMFERENCE 161.0f //wheel circumference in mm
+#define WHEEL_BASE 146.9f //wheel base in mm
 
 #define VEL_TICKER_PERIOD 0.1 //ticker period for velocity calculation
 #define PID_TICKER_PERIOD 0.1 //ticker period for PID calculation
@@ -44,13 +44,13 @@ using namespace rtos;
 #define PWM_PERIOD_US 20 //pwm period in microseconds
 
 //pid constants
-#define VELKP 0.01
-#define VELKI 0.02
-#define VELKD 0.00001
+#define VELKP 0.0008
+#define VELKI 0.05
+#define VELKD 0
 
-#define POSKP 0.025
-#define POSKI 0.0002
-#define POSKD 0.00001
+#define POSKP 0.12
+#define POSKI 0.000001
+#define POSKD 0
 
 #define TURNINGKP 0.045
 #define TURNINGKI 0.0004

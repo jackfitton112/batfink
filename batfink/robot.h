@@ -19,8 +19,8 @@
 
 #include <mbed/mbed.h>
 
-#define WHEEL_DIA 47.0f //mm
-#define TRACK_WIDTH 150.0f //mm
+#define WHEEL_DIA 50.7f //mm
+#define TRACK_WIDTH 146.9f //mm
 #define PI 3.14159265358979323846f
 #define XYT_UPDATE_INTERVAL 0.1 //s
 #define TURN_OFFSET 1.00f //0% error in turning

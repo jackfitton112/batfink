@@ -30,4 +30,7 @@ extern void mapping();
 extern void printMaze();
 
 
+extern int map_hold;
+
+
 #endif // MAPPING_H

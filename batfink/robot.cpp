@@ -209,10 +209,11 @@ int Batfink::_turn(int angle, robotDriveDirection direction){
     //set direction
     _direction = direction;
 
-    encoderCounts *= TURN_OFFSET; //1.2f is the offset to account for slippage
+    encoderCounts *= TURN_OFFSET; //93% as it is overshooting
 
-    leftMotor._movementMode = TURNING;
-    rightMotor._movementMode = TURNING;
+    _leftMotor._movementMode = TURNING;
+    _rightMotor._movementMode = TURNING;
+
 
 
     //if direction is left, set left motor to reverse and right motor to forward

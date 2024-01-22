@@ -1,3 +1,10 @@
+# Title: Data Plotter
+# Description: Plots data from a CSV file created from the robot's sensor readings sent via BLE
+# Author: Jack Fitton
+# Version: 1.0
+# Date: 21/01/2024
+# (c) Copyright 2024 Jack Fitton
+
 import pygame
 import csv
 import math

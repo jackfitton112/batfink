@@ -14,7 +14,7 @@
 
 
 rtos::Thread MappingThread(osPriorityNormal, 4096);
-
+int map_hold = 1;
 
 
 // Initialize the maze array
@@ -41,6 +41,8 @@ void updateMaze(int x, int y, CellState state) {
 void mapping() {
     while (true) {
 
+        if (map_hold == 1){
+
         //get robot x and y
         int x = batfinkRobot._XPOS;
         int y = batfinkRobot._YPOS;
@@ -65,7 +67,11 @@ void mapping() {
         updateMaze(x, y + ldist, WALL); //This is not always going to be plus minus, it needs to be dynamic based off which way the robot faces
         updateMaze(x, y - rdist, WALL);
 
+        } else {
+            ThisThread::sleep_for(1000);
+        }
 
+        
 
     
 
