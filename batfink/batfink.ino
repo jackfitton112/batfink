@@ -43,10 +43,18 @@ void setup(){
 
     initMaze();
 
+    err = bleSetup();
+
+    if (err != 0){
+        Serial.print("Error setting up bluetooth: ");
+        Serial.println(err);
+    }
+
     Serial.println("Setup complete");
 
-   robotDriveThread.start(drive);
-    OverrideThread.start(obsticleAvoidance);
+    robotDriveThread.start(drive);
+      OverrideThread.start(obsticleAvoidance);
+
 
 
 
@@ -85,7 +93,11 @@ int messureSensorDistance(sensorType sensor){
 
 void obsticleAvoidance(){
 
+    ThisThread::sleep_for(2000);
+
     while(1){
+
+    
 
         while(SerialConnected == 1){
             ThisThread::sleep_for(100);
@@ -95,28 +107,28 @@ void obsticleAvoidance(){
         int left = batfinkRobot._leftSensorDistancemm;
         int right = batfinkRobot._rightSensorDistancemm;
 
-        if (front < 100 || left < 50 || right < 50){
+        if (front < 30 || left < 30 || right < 30){
             EmergencyOverride = 1;
-            if (front < 100){
+            if (front < 30){
                //check if left or right is less
                 if (left < right){
                      //turn right
-                     Serial.println("Turning Right 90");
+                     Serial.println("Turning Right 45");
                      batfinkRobot.turnRight(90);
                 } else {
                      //turn left
-                     Serial.println("Turning Left 90");
+                     Serial.println("Turning Left 45");
                      batfinkRobot.turnLeft(90);
                 }
 
             } else if (left < 50){
                 //turn right
                 Serial.println("Turning Right 90");
-                batfinkRobot.turnRight(90);
+                batfinkRobot.turnRight(45);
             } else if (right < 50){
                 //turn left
                 Serial.println("Turning Left 90");
-                batfinkRobot.turnLeft(90);
+                batfinkRobot.turnLeft(45);
 
             }
         } else {
@@ -128,59 +140,64 @@ void obsticleAvoidance(){
 
 }
 
-void drive(){
-
-
-    //wait 2s
+void drive() {
+    // Wait 2s
     ThisThread::sleep_for(2000);
 
+    // Initialize the previous left distance
+    int previousLeft = 0;
 
-    while(1){
-
+    while(1) {
+        // Check for emergency override or serial connection
         while(EmergencyOverride == 1 || SerialConnected == 1){
             ThisThread::sleep_for(100);
         }
 
-        int front = messureSensorDistance(FRONTSENSOR);
-        //int left = messureSensorDistance(LEFTSENSOR);
-        //int right = messureSensorDistance(RIGHTSENSOR);
-
-        //print sensor values
+        int fronts = batfinkRobot._frontSensorDistancemm;
+        int lefts = batfinkRobot._leftSensorDistancemm;
+        
+        // Print sensor values
         Serial.print("Front: ");
-        Serial.print(front);
+        Serial.print(fronts);
+        Serial.print(" Left: ");
+        Serial.println(lefts);
 
+        // Desired distance from the left wall
+        int desiredDistancemin = 70;
+        int desiredDistancemax = 150;
 
-
-        //if front sensor is less than 15cm
-        if (front < 100){
-            //if left sensor is less than right sensor
-            int left = batfinkRobot._leftSensorDistancemm;
-            int right = batfinkRobot._rightSensorDistancemm;
-            if (left < right){
-                //turn left
-                Serial.println("Turning Right 90");
-                batfinkRobot.turnRight(90);
+        // Check if the robot has passed the edge of the wall
+        if (previousLeft <= 100 && lefts > 200) {
+            Serial.println("Passed Wall Edge - Turning Left 90");
+            batfinkRobot.turnLeft(90);
+            batfinkRobot.driveForward(150);
+            batfinkRobot.turnLeft(90);
+        } else if (fronts < 12) {
+            // Avoid obstacle by turning right
+            Serial.println("Obstacle Ahead - Turning Right 90");
+            batfinkRobot.turnRight(90);
+        } else {
+            // Adjust the robot's position relative to the left wall
+            if (lefts < desiredDistancemin) {
+                // Turn left
+                Serial.println("Turning Left 45");
+                batfinkRobot.turnLeft(45);
+            } else if (lefts > desiredDistancemax) {
+                // Turn right
+                Serial.println("Turning Right 45");
+                batfinkRobot.turnRight(45);
             } else {
-                //turn right
-                Serial.println("Turning Left 90");
-                batfinkRobot.turnLeft(90);
+                // Continue driving forward
+                Serial.println("Driving Forward");
+                batfinkRobot.driveForward(100); // Adjust the driving distance as needed
             }
         }
 
-        else {
-            //drive forward
-            //print drive distance
-            int dist = (front - 90); //drive just into the turning state
-            Serial.print("Driving forward: ");
-            Serial.println(dist);
-    
-            batfinkRobot.driveForward(dist);
-        }
-
+        // Update the previous left distance
+        previousLeft = lefts;
     }
-
-    
 }
+
 
 void printMaze() {
     Serial.println("========================================");

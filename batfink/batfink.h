@@ -17,6 +17,7 @@
 #include "error.h"
 #include "robot.h"
 #include "mapping.h"
+#include "bluetooth.h"
 
 
 #include <mbed/mbed.h>

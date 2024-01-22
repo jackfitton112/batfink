@@ -1,0 +1,15 @@
+Hi Mark,
+
+There are some things to note:
+
+inside this zip there are a few files that need a little explaining
+
+- Python - contains all of the scripts like the BLE controller and Mapping / Solver aswell as a dataplotter.
+
+- batfink - Robot Code
+
+- CAD drawings - anotated drawings + CAD models for all parts used!
+
+Many Thanks!
+
+Jack
