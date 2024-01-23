@@ -12,9 +12,12 @@
 #ifndef MAPPING_H
 #define MAPPING_H
 
+
+
 #include <mbed/mbed.h>
 #include <array>
 #include "robot.h"
+#include <math.h>
 
 
 //1.5m x 2m maze with 5cm cells
@@ -31,6 +34,7 @@ extern void printMaze();
 
 
 extern int map_hold;
+
 
 
 #endif // MAPPING_H

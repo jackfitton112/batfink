@@ -70,12 +70,58 @@ def pickAlgo():
 
 algo = pickAlgo()
 
-#Maze is 2m x 1.5m with 10cm cells
-GRID_X = 200 // 5
-GRID_Y = 150 // 5
+def loadMap(file):
+    #open the file
+    f = open(file, "r")
 
-PIXELS_X = 1000
-PIXELS_Y = 1000
+    #read the file
+    data = f.read()
+
+    #strip b', ', and \r
+    data = data.replace("b'", "")
+    data = data.replace("\\r", "")
+    data = data.replace("'", "")
+
+    #go through each line and split it into a list, each line ends with \n
+    data = data.split("\\n") #split into a list of lines
+
+    x = 0
+    y = 0
+
+    for line in data:
+        y += 1
+        x = 0
+        linedata = line.replace("\\n", "")
+        for char in linedata:
+            x += 1
+            if char == "X":
+                if x < GRID_X and y < GRID_Y and x > 0 and y > 0:
+                    cells[(x,y)].set_obstacle()
+                    cells[(x,y)].draw()
+                    pygame.display.flip()
+                else:
+                    print(f"Error plotting obstacle at {x}, {y}")
+                    print(f"Line: {line}")
+                
+            elif char == "P":
+                if x < GRID_X and y < GRID_Y and x > 0 and y > 0:
+                    cells[(x,y)].color = GREY
+                    cells[(x,y)].draw()
+                    pygame.display.flip()
+                else:
+                    print(f"Error plotting empty cell at {x}, {y}")
+                    print(f"Line: {line}")
+            
+
+    
+
+
+#Maze is 2m x 1.5m with 10cm cells
+GRID_Y = (200 // 5) + 1
+GRID_X = (150 // 5) + 1
+
+PIXELS_X = 800
+PIXELS_Y = 800
 
 GRID_PIXEL_SIZE_X = PIXELS_X / GRID_X
 GRID_PIXEL_SIZE_Y = PIXELS_Y / GRID_Y
@@ -521,6 +567,12 @@ screen = pygame.display.set_mode((PIXELS_X, PIXELS_Y))
 initMaze(screen)
 draw_grid(screen)
 pygame.display.flip()
+
+
+for cell in cells.values():
+    print(f"Cell at {cell.x}, {cell.y} is obstacle: {cell.is_obstacle}")
+
+loadMap("maze.txt")
 
 
 #Event loop

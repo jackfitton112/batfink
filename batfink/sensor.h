@@ -32,7 +32,7 @@ using namespace rtos;
 #define MBED_USONIC3 P1_13 //LEFT
 #define MBED_USONIC4 P1_15 //NC
 
-#define READ_INTERVAL 0.25 //read interval in seconds
+#define READ_INTERVAL 0.1 //read interval in seconds
 
 // Sensor class to read from ultrasonic sensors
 class Sensor {

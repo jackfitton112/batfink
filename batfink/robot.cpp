@@ -63,7 +63,7 @@ int Batfink::setup(){
     _XYTTicker.attach(callback(this, &Batfink::_updateXYT), XYT_UPDATE_INTERVAL);
 
     //setup sensor ticker
-    _sensorTicker.attach(callback(this, &Batfink::_updateSensorValues), 0.25);
+    _sensorTicker.attach(callback(this, &Batfink::_updateSensorValues), 0.1);
 
     return OK;
 }

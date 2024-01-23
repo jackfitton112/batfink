@@ -41,7 +41,7 @@ void setup(){
         Serial.println(err);
     }
 
-    initMaze();
+
 
     err = bleSetup();
 
@@ -55,8 +55,7 @@ void setup(){
     robotDriveThread.start(exploreMode);
     //OverrideThread.start(obsticleAvoidance);
 
-    //turn left 360 degrees
-    //batfinkRobot.turnLeft(360);
+    initMaze();
 }
 
 int messureSensorDistance(sensorType sensor){
@@ -230,6 +229,8 @@ int calculateTurnBias(int LeftDistance, int RightDistance){
 
 void exploreMode(){
 
+    map_hold = 0;
+
 
     //wait 2s to allow sensors to settle
     ThisThread::sleep_for(2000);
@@ -285,6 +286,8 @@ void exploreMode(){
     int theoreticalAngle;
     int angle;
     int i;
+
+    map_hold = 1;
 
     //start exploring the maze
     while(1){
@@ -449,15 +452,21 @@ void exploreMode(){
 
 
     //wait for a serial connection
-    while(!Serial.available()){
+    //THIS ISNT WAITING FOR SERIAL CONNECTION
+    while(!Serial){
         ThisThread::sleep_for(100);
     }
+
+    ThisThread::sleep_for(1000);
+
+
+    map_hold = 0;
 
     //print the maze
     printMaze();
 
     //wait for serial to be disconnected
-    while(Serial.available()){
+    while(Serial){
         ThisThread::sleep_for(100);
     }
 
@@ -482,7 +491,7 @@ void printMaze() {
                     Serial.print("?");
                     break;
                 case EMPTY:
-                    Serial.print(" ");
+                    Serial.print("P");
                     break;
                 case WALL:
                     Serial.print("X");
@@ -498,47 +507,13 @@ void printMaze() {
 
 void loop(){
 
-    //if serial is connected, stop the robot, stop the mapping and print the maze
 
-    /*if (Serial.available() > 0){
-        map_hold = 0;
-        Serial.println("Serial connected, stopping robot");
-        batfinkRobot.stop();
-        Serial.println("Printing maze");
-        printMaze();
-        Serial.println("Stopping");
-        while(Serial.available() > 0){
-            ThisThread::sleep_for(100);\
-        }
-        map_hold = 1;
-    }
-    */
-    /*
-   //print encoder count and target position
-    Serial.print("Left encoder count: ");
-    Serial.print(batfinkRobot._leftMotor._encoderCount);
-    Serial.print(" Left target position: ");
-    Serial.print(batfinkRobot._leftMotor._TargetPosition);
-    Serial.print(" Right encoder count: ");
-    Serial.print(batfinkRobot._rightMotor._encoderCount);
-    Serial.print(" Right target position: ");
-    Serial.println(batfinkRobot._rightMotor._TargetPosition);
-    */
-
-
-    //angle calibration, print real angle and theoretical angle
-    Serial.print("Real angle: ");
-    Serial.print(batfinkRobot._angleDeg);
-    Serial.print(" Theoretical angle: ");
-    Serial.print(batfinkRobot._TheoreticalAngle);
-
-    //print delta angle
-    int deltaAngle = batfinkRobot._TheoreticalAngle - batfinkRobot._angleDeg;
-    Serial.print(" Delta angle: ");
-    Serial.println(deltaAngle);
   
     //wait for 1 second 
     ThisThread::sleep_for(1000);
 
 
 }
+
+
+

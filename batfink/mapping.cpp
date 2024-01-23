@@ -9,16 +9,18 @@
  * 
  */
 
+
 #include "mapping.h"
 
 
 
 rtos::Thread MappingThread(osPriorityNormal, 4096);
-int map_hold = 1;
 
 
 // Initialize the maze array
 std::array<std::array<CellState, MAZE_HEIGHT>, MAZE_WIDTH> maze;
+
+int map_hold = 0;
 
 // Initialize maze with unknown cells
 void initMaze() {
@@ -32,52 +34,53 @@ void initMaze() {
 
 // Update function based on sensor data
 void updateMaze(int x, int y, CellState state) {
+
+    x = x / 50;
+    y = y / 50;
+
     if (x >= 0 && x < MAZE_WIDTH && y >= 0 && y < MAZE_HEIGHT) {
         maze[x][y] = state;
+
     }
 }
 
 // Mapping thread
 void mapping() {
     while (true) {
+        if (map_hold == 1) {
+            // Get robot position and orientation
+            int x = batfinkRobot._XPOS;
+            int y = batfinkRobot._YPOS;
+            double theta = batfinkRobot._THETA_RAD;
 
-        if (map_hold == 1){
+            // Get sensor distances
+            int fsensor = batfinkRobot._frontSensorDistancemm;
+            int lsensor = batfinkRobot._leftSensorDistancemm;
+            int rsensor = batfinkRobot._rightSensorDistancemm;
 
-        //get robot x and y
-        int x = batfinkRobot._XPOS;
-        int y = batfinkRobot._YPOS;
-        double theta = batfinkRobot._THETA_RAD;
+            // Update maze for robot's current position
+            updateMaze(x, y, EMPTY);
 
+            // Calculate wall positions based on sensors and orientation
+            // Convert sensor readings from mm to maze cell units and adjust positions
+            int fWallX = x + (fsensor * cos(theta)) / 5;
+            int fWallY = y + (fsensor * sin(theta)) / 5;
+            int lWallX = x + (lsensor * cos(theta + M_PI_2)) / 5;
+            int lWallY = y + (lsensor * sin(theta + M_PI_2)) / 5;
+            int rWallX = x + (rsensor * cos(theta - M_PI_2)) / 5;
+            int rWallY = y + (rsensor * sin(theta - M_PI_2)) / 5;
 
-        int fsensor = batfinkRobot._frontSensorDistancemm;
-        int lsensor = batfinkRobot._leftSensorDistancemm;
-        int rsensor = batfinkRobot._rightSensorDistancemm;
+            // Update maze with wall positions
+            updateMaze(fWallX, fWallY, WALL);
+            updateMaze(lWallX, lWallY, WALL);
+            updateMaze(rWallX, rWallY, WALL);
 
-        //update maze
-        updateMaze(x, y, EMPTY);
-
-        //calulate distances to walls
-        int fdist = (fsensor * cos(theta)) - 20;
-        int ldist = (lsensor * cos(theta + 1.5708)) - 20;
-        int rdist = (rsensor * cos(theta - 1.5708)) - 20;
-
-
-        //update maze
-        updateMaze(x + fdist, y, WALL);//Not sure if this is correct
-        updateMaze(x, y + ldist, WALL); //This is not always going to be plus minus, it needs to be dynamic based off which way the robot faces
-        updateMaze(x, y - rdist, WALL);
-
+            ThisThread::sleep_for(50);
         } else {
             ThisThread::sleep_for(1000);
         }
-
-        
-
-    
-
     }
 }
-
 
 
 
