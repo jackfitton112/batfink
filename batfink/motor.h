@@ -48,13 +48,13 @@ using namespace rtos;
 #define VELKI 0.05
 #define VELKD 0
 
-#define POSKP 0.12
-#define POSKI 0.000001
-#define POSKD 0
+#define POSKP 0.07
+#define POSKI 0.00001
+#define POSKD 0.000001
 
-#define TURNINGKP 0.045
-#define TURNINGKI 0.0004
-#define TURNINGKD 0.00001
+#define TURNINGKP 0.035
+#define TURNINGKI 0.00001
+#define TURNINGKD 0.000001
 
 
 //called in the constructor, used as only 1 of the encoder pins is connected therefore dir is required

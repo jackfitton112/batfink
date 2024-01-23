@@ -44,8 +44,8 @@ class Batfink {
         int setup();
         int driveForward(int distancemm);
         int driveBackward(int distancemm);
-        int turnLeft(int angle);
-        int turnRight(int angle);
+        int turnLeft(int angle, int offset = 0);
+        int turnRight(int angle, int offset = 0);
         int stop();
         int move(int direction, int distance);
 
@@ -53,7 +53,7 @@ class Batfink {
 
         //private functions
         int _drive(int distancemm, robotDriveDirection direction);
-        int _turn(int angle, robotDriveDirection direction);
+        int _turn(int angle, robotDriveDirection direction, int offset = 0);
 
         float _helper_CalculateDistanceFromEncoder(float encoderCount);
         float _helper_CalculateEncoderCountFromDistance(float distancemm);
@@ -75,6 +75,7 @@ class Batfink {
         int _YPOS_ERR;
         double _THETA_RAD; //theta in radians
         double _AngleERR;
+        int _TheoreticalAngle; //the theoretical angle of the robot in degrees
         robotDriveDirection _direction;
 
 
@@ -106,7 +107,7 @@ class Batfink {
         //error var
         int _ERR;
         int _DEBUGVAL;
-        int _angleDeg;
+        int _angleDeg; //Angle of the robot in degrees
 
    
 };

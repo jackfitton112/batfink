@@ -150,8 +150,13 @@ void Motor::_PID(){
             return;
         case CONSTANT_VELOCITY:
 
-            //if less than 1/4 of a rotation away from target, switch to exact position control
-            if (abs(_TargetPosition - _encoderCount) < ENC_CPR / 4) {
+            //if target is less than 1 rotation away, lower the speed to 7rpm
+            if (abs(_TargetPosition - _encoderCount) < ENC_CPR) {
+                setVelocity(7);
+            }
+
+            //if less than 1/8 of a rotation away from target, switch to exact position control
+            if (abs(_TargetPosition - _encoderCount) < ENC_CPR / 8) {
                 //reset PID values
                 _PIDerror = _TargetPosition - _encoderCount;
                 _PIDlastError = _TargetPosition - _encoderCount;
@@ -179,7 +184,7 @@ void Motor::_PID(){
             //if target is more than a rotation away, use velocity control
             _PIDerror = _TargetPosition - _encoderCount;
             
-            if (abs(_TargetPosition - _encoderCount) > ENC_CPR) {
+            if (abs(_TargetPosition - _encoderCount) > ENC_CPR /2) {
                 //reset PID values
                 _PIDerror = _TargetVelocity - _currentVelocity;
                 _PIDlastError = _TargetVelocity - _currentVelocity;
@@ -200,11 +205,17 @@ void Motor::_PID(){
             //clamp output to +/- 0.5
             _PIDoutput = fmax(fmin(_PIDoutput, 0.5), -0.5);
 
+            //if less than 1/8 of a rotation away from target, clamp output to +/- 0.2
+            if (abs(_TargetPosition - _encoderCount) < ENC_CPR / 8) {
+                _PIDoutput = fmax(fmin(_PIDoutput, 0.2), -0.2);
+            }
+
+
             //update last error
             _PIDlastError = _PIDerror;
 
             //if PID error is less than 10 encoder counts, switch to STP mode
-            if (abs(_TargetPosition - _encoderCount) < 10 && _TargetPosition != 0) {
+            if (abs(_TargetPosition - _encoderCount) < 15 && _TargetPosition != 0) {
                 _movementMode = STP;
                 _PIDoutput = 0;
                 _setPWM(_PIDoutput);
@@ -225,12 +236,18 @@ void Motor::_PID(){
             _PIDoutput = _PIDerror * TURNINGKP + _PIDintegral * TURNINGKI + _PIDderivative * TURNINGKD;
 
             //clamp output to +/- 0.3
-            _PIDoutput = fmax(fmin(_PIDoutput, 0.3), -0.3);
+            _PIDoutput = fmax(fmin(_PIDoutput, 0.4), -0.4);
+
+            if (abs(_TargetPosition - _encoderCount) < ENC_CPR / 8) {
+                _PIDoutput = fmax(fmin(_PIDoutput, 0.2), -0.2);
+            }
+
+            
 
             //update last error
             _PIDlastError = _PIDerror;
 
-            if (abs(_TargetPosition - _encoderCount) < 10 && _TargetPosition != 0) {
+            if (abs(_TargetPosition - _encoderCount) < 25 && _TargetPosition != 0) {
                 _movementMode = STP;
                 _PIDoutput = 0;
                 _setPWM(_PIDoutput);

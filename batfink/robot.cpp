@@ -103,9 +103,9 @@ int Batfink::driveBackward(int distancemm){
  * @param angle 
  * @return int 
  */
-int Batfink::turnLeft(int angle){
+int Batfink::turnLeft(int angle, int offset){
     _direction = LEFT;
-    return _turn(angle, LEFT);
+    return _turn(angle, LEFT, offset);
 }
 
 /**
@@ -114,9 +114,9 @@ int Batfink::turnLeft(int angle){
  * @param angle 
  * @return int 
  */
-int Batfink::turnRight(int angle){
+int Batfink::turnRight(int angle, int offset){
     _direction = RIGHT;
-    return _turn(angle, RIGHT);
+    return _turn(angle, RIGHT, offset);
 }
 
 /**
@@ -200,11 +200,11 @@ int Batfink::_drive(int distancemm, robotDriveDirection direction){
  * @param direction 
  * @return int 
  */
-int Batfink::_turn(int angle, robotDriveDirection direction){
+int Batfink::_turn(int angle, robotDriveDirection direction, int offset){
     //calculate encoder counts
     
 
-    float encoderCounts = _helper_CalculateEncoderCountsFromAngle(angle);
+    float encoderCounts = _helper_CalculateEncoderCountsFromAngle(angle + offset);
 
     //set direction
     _direction = direction;
@@ -231,6 +231,16 @@ int Batfink::_turn(int angle, robotDriveDirection direction){
     while(_leftMotor._movementMode != STP && _rightMotor._movementMode != STP){
         ThisThread::sleep_for(100);
     }
+
+    //update theoretical angle with what was supposed to be turned
+    //the 360 + is to account for negative angles, now instead of -15 we have 345
+    if (direction == LEFT){
+        _TheoreticalAngle += 360 - angle;
+    } else {
+        _TheoreticalAngle += 360 + angle;
+    }
+
+    _TheoreticalAngle = _TheoreticalAngle % 360;
 
     return OK;
 }
@@ -261,15 +271,17 @@ void Batfink::_updateXYT(){
     //calculate X,Y,Theta without converting angle to degrees
     _XPOS += (distanceTravelled * cos(_THETA_RAD + (angleTravelled / 2))) * 1.08f; //1.05f is the offset to account for slippage
     _YPOS += distanceTravelled * sin(_THETA_RAD + (angleTravelled / 2)) * 1.08f; //is the offset to account for slippage
-    _THETA_RAD += angleTravelled;
+    _THETA_RAD += (2*PI) + angleTravelled;
+    _THETA_RAD = fmod(_THETA_RAD, 2*PI);
 
-    // Normalize the _THETA_RAD to stay within -π to π
-    while(_THETA_RAD > PI) _THETA_RAD -= 2 * PI;
-    while(_THETA_RAD < -PI) _THETA_RAD += 2 * PI;
+
+
+    
 
 
     //convert theta to degrees
-    _angleDeg = _THETA_RAD * (180.0f / PI);
+    _angleDeg = 360 + (_THETA_RAD * (180 / PI)); //if the angle is negative, add 360 to it to make it positive
+    _angleDeg = _angleDeg % 360; //modulus 360 to keep it within 0 and 360
 
 
 
@@ -306,7 +318,7 @@ double Batfink::_helper_CalculateAngleFromEncoder(int leftEncoderCount, int righ
     _leftDistance = ((float)leftEncoderCount / ENC_CPR) * (PI * WHEEL_DIA);
     _rightDistance = ((float)rightEncoderCount / ENC_CPR) * (PI * WHEEL_DIA);
     _DEBUGVAL = ((float)_leftDistance - (float)_rightDistance) / TRACK_WIDTH; // This is in radians
-    return (((float)_leftDistance - (float)_rightDistance) / TRACK_WIDTH) *1.0f; // This is in radians
+    return (((float)_leftDistance - (float)_rightDistance) / TRACK_WIDTH) * 1.0f; // This is in radians
 }
 
 
